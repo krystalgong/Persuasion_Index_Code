@@ -1,0 +1,1968 @@
+{
+  "EVI_UNITS": {
+    "parent_appeal": "Logos",
+    "parent_dimension": "Evidence",
+    "parent_subfeature": "statistical",
+    "function": "Units of measurement, statistical markers, currencies, and quantitative indicators that ground claims in verifiable numerical evidence.",
+    "theory_anchor": "Zebregs et al. (2015) on statistical evidence; targets cognitive belief change via factual grounding.",
+    "include": [
+      "SI / imperial units of measure (kg, mi, ml, ft, °C, mph)",
+      "Currency symbols and codes (USD, EUR, $, £, JPY)",
+      "Statistical indicators (p-value, percentage, ratio, coefficient, significance)",
+      "Magnitude words used in numerical context (million, billion, thousand)"
+    ],
+    "exclude": [
+      "Polysemous letters with non-measurement meanings in dominant English use",
+      "Generic quantifiers without measurement function (some, many, several) — those belong to SPEC_VAGUE",
+      "Number words used as ordinals/names (first, second as ranks)"
+    ],
+    "common_drift_traps": [
+      {
+        "word": "size",
+        "drift_type": "HYPERNYM_DILUTION",
+        "why": "Generic noun, not a measurement unit"
+      },
+      {
+        "word": "many",
+        "drift_type": "TOPICAL_NEIGHBOR",
+        "why": "Vague quantifier; belongs to SPEC_VAGUE"
+      }
+    ],
+    "canonical_seeds": [
+      "%",
+      "kg",
+      "million",
+      "percentage",
+      "p-value",
+      "USD"
+    ]
+  },
+  "REPORTING_VERBS": {
+    "parent_appeal": "Logos",
+    "parent_dimension": "Evidence",
+    "parent_subfeature": "attribution",
+    "function": "Verbs used to report or attribute findings, claims, or evidence to a source (e.g., 'the study showed', 'they argued').",
+    "theory_anchor": "Hyland (2002) reporting verbs; attribution as central-route credibility cue.",
+    "include": [
+      "Past- and present-tense reporting verbs (showed, found, reported, argued, concluded, noted)",
+      "Verbs marking knowledge claims attributable to a source (estimated, confirmed, demonstrated, observed)"
+    ],
+    "exclude": [
+      "Pure communication verbs without epistemic content (talked, chatted)",
+      "Stance-taking performative verbs without reporting function (assert, contend) — belong to ARG_CLAIM",
+      "General factive verbs not tied to source attribution (knew, realized)"
+    ],
+    "common_drift_traps": [
+      {
+        "word": "talked",
+        "drift_type": "HYPERNYM_DILUTION",
+        "why": "Generic communication verb; no epistemic attribution"
+      },
+      {
+        "word": "claim",
+        "drift_type": "TOPICAL_NEIGHBOR",
+        "why": "Stance-taking verb, not source attribution; belongs to ARG_CLAIM"
+      }
+    ],
+    "canonical_seeds": [
+      "showed",
+      "found",
+      "reported",
+      "argued",
+      "concluded"
+    ]
+  },
+  "LOGIC_CAUSAL": {
+    "parent_appeal": "Logos",
+    "parent_dimension": "Logic and Cohesion",
+    "parent_subfeature": "structural_reasoning",
+    "function": "Closed-class connectives that mark a CAUSAL relation between propositions (cause→effect, reason→consequence).",
+    "theory_anchor": "Kaakinen & Hyönä (2011) cohesion; Heuristic-Systematic Model (Chaiken 1980).",
+    "include": [
+      "Causal subordinators (because, since, as)",
+      "Causal coordinators / inferential adverbs (therefore, thus, hence, consequently, accordingly)",
+      "Causal phrasal markers (due to, owing to, as a result, that is why)"
+    ],
+    "exclude": [
+      "Content words masquerading as connectives (e.g., 'reason' as a noun)",
+      "Connectives from a different logical relation (contrastive 'but' should not enter LOGIC_CAUSAL)",
+      "Lexicalized phrases that have lost connective function in modern usage",
+      "Contrastive markers (however, but, although) — belong to LOGIC_CONTRAST"
+    ],
+    "common_drift_traps": [
+      {
+        "word": "but",
+        "drift_type": "VALENCE_FLIP",
+        "why": "Contrastive, not causal"
+      },
+      {
+        "word": "reason",
+        "drift_type": "POS_DRIFT",
+        "why": "Noun, not connective"
+      },
+      {
+        "word": "cause",
+        "drift_type": "POS_DRIFT",
+        "why": "Verb/noun; only 'because' is the connective"
+      }
+    ],
+    "canonical_seeds": [
+      "because",
+      "therefore",
+      "thus",
+      "since",
+      "consequently"
+    ]
+  },
+  "LOGIC_CONTRAST": {
+    "parent_appeal": "Logos",
+    "parent_dimension": "Logic and Cohesion",
+    "parent_subfeature": "discourse_cohesion",
+    "function": "Closed-class connectives marking a CONTRASTIVE / adversative relation (concession, opposition, exception).",
+    "theory_anchor": "Cohesion theory (Halliday & Hasan); ELM systematic processing.",
+    "include": [
+      "Adversative coordinators / adverbs (but, however, yet, nevertheless, nonetheless)",
+      "Concessive subordinators (although, though, even though, whereas, while [contrastive])",
+      "Contrastive phrasal markers (on the other hand, in contrast, by contrast)"
+    ],
+    "exclude": [
+      "Content words masquerading as connectives (e.g., 'reason' as a noun)",
+      "Connectives from a different logical relation (contrastive 'but' should not enter LOGIC_CAUSAL)",
+      "Lexicalized phrases that have lost connective function in modern usage",
+      "Causal markers (because, therefore) — belong to LOGIC_CAUSAL",
+      "Pure additives (also, moreover) — belong to LOGIC_ADDITIVE",
+      "Temporal 'while' without contrastive function"
+    ],
+    "common_drift_traps": [
+      {
+        "word": "while",
+        "drift_type": "POS_DRIFT",
+        "why": "Polysemous: contrastive vs. temporal — only contrastive use qualifies"
+      },
+      {
+        "word": "and",
+        "drift_type": "VALENCE_FLIP",
+        "why": "Additive, not contrastive"
+      }
+    ],
+    "canonical_seeds": [
+      "however",
+      "but",
+      "although",
+      "yet",
+      "nevertheless"
+    ]
+  },
+  "LOGIC_ADDITIVE": {
+    "parent_appeal": "Logos",
+    "parent_dimension": "Logic and Cohesion",
+    "parent_subfeature": "discourse_cohesion",
+    "function": "Closed-class connectives marking ADDITIVE / elaborative relations (and-type extensions of an argument).",
+    "theory_anchor": "Cohesion theory; chains of related propositions.",
+    "include": [
+      "Additive coordinators / adverbs (also, moreover, furthermore, additionally, plus, besides)",
+      "Enumerative additives (firstly, secondly, finally as list-extenders)",
+      "Phrasal additive markers (in addition, what is more)"
+    ],
+    "exclude": [
+      "Content words masquerading as connectives (e.g., 'reason' as a noun)",
+      "Connectives from a different logical relation (contrastive 'but' should not enter LOGIC_CAUSAL)",
+      "Lexicalized phrases that have lost connective function in modern usage",
+      "Contrastive markers — belong to LOGIC_CONTRAST",
+      "Causal markers — belong to LOGIC_CAUSAL"
+    ],
+    "common_drift_traps": [
+      {
+        "word": "however",
+        "drift_type": "VALENCE_FLIP",
+        "why": "Contrastive, not additive"
+      },
+      {
+        "word": "because",
+        "drift_type": "VALENCE_FLIP",
+        "why": "Causal, not additive"
+      }
+    ],
+    "canonical_seeds": [
+      "also",
+      "moreover",
+      "furthermore",
+      "additionally",
+      "in addition"
+    ]
+  },
+  "LOGIC_INFERENCE": {
+    "parent_appeal": "Logos",
+    "parent_dimension": "Logic and Cohesion",
+    "parent_subfeature": "structural_reasoning",
+    "function": "Inferential markers that signal a logical conclusion drawn from prior content (so X, hence X, it follows that X).",
+    "theory_anchor": "Toulmin warrant→claim transitions; ELM systematic chain.",
+    "include": [
+      "Inferential adverbs (so, hence, thus, ergo, accordingly)",
+      "Inferential phrases (it follows that, this implies, therefore we can conclude)",
+      "Logical-derivation markers (consequently, as a result)"
+    ],
+    "exclude": [
+      "Content words masquerading as connectives (e.g., 'reason' as a noun)",
+      "Connectives from a different logical relation (contrastive 'but' should not enter LOGIC_CAUSAL)",
+      "Lexicalized phrases that have lost connective function in modern usage",
+      "Pure causal connectives (because, since) — those mark cause, not inference; belong to LOGIC_CAUSAL",
+      "Conclusion summary phrases ('in conclusion', 'to sum up') — belong to ARG_CONCLUSION"
+    ],
+    "common_drift_traps": [
+      {
+        "word": "because",
+        "drift_type": "TOPICAL_NEIGHBOR",
+        "why": "Marks cause, not inferential conclusion"
+      },
+      {
+        "word": "finally",
+        "drift_type": "TOPICAL_NEIGHBOR",
+        "why": "Temporal/enumerative, not inferential"
+      }
+    ],
+    "canonical_seeds": [
+      "thus",
+      "hence",
+      "so",
+      "ergo",
+      "it follows that"
+    ]
+  },
+  "LOGIC_REFERENCE": {
+    "parent_appeal": "Logos",
+    "parent_dimension": "Logic and Cohesion",
+    "parent_subfeature": "structural_reasoning",
+    "function": "Referential markers that bind discourse via anaphora/cataphora to prior or upcoming content (this, that, the aforementioned, the latter).",
+    "theory_anchor": "Halliday & Hasan reference cohesion; reduces processing load.",
+    "include": [
+      "Demonstrative referential pronouns/determiners with discourse-tracking function (this, that, these, those, such)",
+      "Anaphoric phrasal markers (the former, the latter, the aforementioned, said [argument])",
+      "Cataphoric / forward-reference markers (the following, as below)"
+    ],
+    "exclude": [
+      "Content words masquerading as connectives (e.g., 'reason' as a noun)",
+      "Connectives from a different logical relation (contrastive 'but' should not enter LOGIC_CAUSAL)",
+      "Lexicalized phrases that have lost connective function in modern usage",
+      "Demonstratives in deictic spatial/temporal use ('this room' physical reference) — that's SPEC_PSYCH_NEAR",
+      "Personal pronouns (he, she, they)"
+    ],
+    "common_drift_traps": [
+      {
+        "word": "this",
+        "drift_type": "POS_DRIFT",
+        "why": "Polysemous: spatial deixis vs. discourse anaphora — judge contextual function"
+      }
+    ],
+    "canonical_seeds": [
+      "this",
+      "that",
+      "the aforementioned",
+      "the former",
+      "the latter"
+    ]
+  },
+  "ARG_CLAIM": {
+    "parent_appeal": "Logos",
+    "parent_dimension": "Argumentation",
+    "parent_subfeature": "conclusion_explicitness",
+    "function": "Stance-taking illocutionary verbs that explicitly mark a CLAIM or assertion as a speech act in argumentative discourse.",
+    "theory_anchor": "Toulmin (1958) claim node; O'Keefe (1997) standpoint explicitness; ELM central-route processing.",
+    "include": [
+      "Verbs marking the speech act of claiming/asserting (claim, argue, assert, contend, maintain, hold)",
+      "First-person performative formulations (I argue, I'd contend, I claim)",
+      "Stance verbs that commit the speaker to a proposition (insist, posit, postulate)"
+    ],
+    "exclude": [
+      "Nominal forms denoting OUTCOME or PROCESS rather than the speech act (negotiation, agreement, settlement)",
+      "Antonymous stance markers — refutation rather than claim (reject, refuse, oppose, deny)",
+      "Generic communication verbs without stance commitment (discuss, mention, talk, comment)",
+      "Topical neighbors of the debate domain (proposal, deal, position [as noun])"
+    ],
+    "common_drift_traps": [
+      {
+        "word": "negotiation",
+        "drift_type": "POS_DRIFT",
+        "why": "Process noun, not stance-marking verb"
+      },
+      {
+        "word": "reject",
+        "drift_type": "VALENCE_FLIP",
+        "why": "Refutation; opposite illocutionary direction"
+      },
+      {
+        "word": "discuss",
+        "drift_type": "TOPICAL_NEIGHBOR",
+        "why": "Communication without stance commitment"
+      },
+      {
+        "word": "agreement",
+        "drift_type": "POS_DRIFT",
+        "why": "Outcome noun, not speech act"
+      }
+    ],
+    "canonical_seeds": [
+      "claim",
+      "argue",
+      "assert",
+      "contend",
+      "maintain"
+    ]
+  },
+  "ARG_PREMISE": {
+    "parent_appeal": "Logos",
+    "parent_dimension": "Argumentation",
+    "parent_subfeature": "premise_density",
+    "function": "Linguistic introducers that explicitly mark a proposition as a PREMISE supporting a claim.",
+    "theory_anchor": "Toulmin grounds/warrant; premise density as ELM peripheral 'length-is-strength' heuristic (Petty 1984).",
+    "include": [
+      "Premise subordinators (because, since, given that, on the grounds that, for)",
+      "Premise-introducing phrases (the reason is, due to the fact that, as evidenced by)",
+      "Warrant-introducing markers (after all, considering that)"
+    ],
+    "exclude": [
+      "Pure causal markers without premise function (consequently, therefore — those introduce conclusions)",
+      "Inferential markers (thus, hence — they follow from premises, not introduce them)"
+    ],
+    "common_drift_traps": [
+      {
+        "word": "therefore",
+        "drift_type": "VALENCE_FLIP",
+        "why": "Introduces conclusion, not premise"
+      },
+      {
+        "word": "reason",
+        "drift_type": "POS_DRIFT",
+        "why": "Noun, not premise introducer"
+      }
+    ],
+    "canonical_seeds": [
+      "because",
+      "since",
+      "given that",
+      "for"
+    ]
+  },
+  "ARG_CONCLUSION": {
+    "parent_appeal": "Logos",
+    "parent_dimension": "Argumentation",
+    "parent_subfeature": "conclusion_explicitness",
+    "function": "Markers that explicitly signal the START of a conclusion or summary statement closing an argument.",
+    "theory_anchor": "O'Keefe (1997) standpoint explicitness; conclusion explicitness reduces audience misinterpretation.",
+    "include": [
+      "Conclusion-introducing connectives (therefore, hence, thus, so, in conclusion)",
+      "Summative phrases (in summary, to sum up, in short, all in all, overall)",
+      "Explicit conclusion markers (we can conclude that, the upshot is, the bottom line is)"
+    ],
+    "exclude": [
+      "Pure premise-markers (because, since) — they introduce supporting reasons, not conclusions",
+      "Mid-argument additives (furthermore) — not conclusion markers"
+    ],
+    "common_drift_traps": [
+      {
+        "word": "because",
+        "drift_type": "VALENCE_FLIP",
+        "why": "Introduces premise, not conclusion"
+      },
+      {
+        "word": "moreover",
+        "drift_type": "TOPICAL_NEIGHBOR",
+        "why": "Additive, not conclusive"
+      }
+    ],
+    "canonical_seeds": [
+      "therefore",
+      "in conclusion",
+      "thus",
+      "to sum up",
+      "in summary"
+    ]
+  },
+  "ARG_STYLE.analogy": {
+    "parent_appeal": "Logos",
+    "parent_dimension": "Argumentation",
+    "parent_subfeature": "style_sophistication",
+    "function": "Markers introducing ANALOGICAL reasoning patterns (X is like Y, analogous to, by analogy, similarly to).",
+    "theory_anchor": "Argument schemes (Walton); analogy as a high-sophistication move.",
+    "include": [
+      "Analogy connectives (analogous to, by analogy, similar to, similarly, akin to, just as)",
+      "Comparison-by-analogy phrasal markers (in the same way, much like, parallel to)",
+      "Simile-anchoring 'like' ONLY when introducing a structural analogy (not preposition or stalling 'like')"
+    ],
+    "exclude": [
+      "Polysemous 'like' as preposition / verb / discourse stalling marker — those are POS_DRIFT",
+      "Pure example markers (for example, e.g.) — belong to ARG_STYLE.example",
+      "Generic similarity adjectives without analogical-reasoning function"
+    ],
+    "common_drift_traps": [
+      {
+        "word": "for example",
+        "drift_type": "TOPICAL_NEIGHBOR",
+        "why": "Example, not analogy"
+      },
+      {
+        "word": "liked",
+        "drift_type": "POS_DRIFT",
+        "why": "Verb sense of 'like'; not analogy connective"
+      },
+      {
+        "word": "likely",
+        "drift_type": "POS_DRIFT",
+        "why": "Probability adverb; not analogy"
+      }
+    ],
+    "canonical_seeds": [
+      "analogous to",
+      "by analogy",
+      "similarly",
+      "akin to",
+      "just as"
+    ]
+  },
+  "ARG_STYLE.cause_effect": {
+    "parent_appeal": "Logos",
+    "parent_dimension": "Argumentation",
+    "parent_subfeature": "style_sophistication",
+    "function": "Markers introducing CAUSE-EFFECT explanatory moves within an argument body (different from logical connectives — these announce a causal explanation).",
+    "theory_anchor": "Argument schemes (Walton); cause-effect as sophistication.",
+    "include": [
+      "Causal explanatory phrases (this leads to, results in, brings about, causes, produces)",
+      "Effect-announcing markers (the effect of X is, has the consequence that)"
+    ],
+    "exclude": [
+      "Pure single-token connectives that fit LOGIC_CAUSAL better (because, since)",
+      "Mere temporal sequence (then, after that)"
+    ],
+    "common_drift_traps": [
+      {
+        "word": "after",
+        "drift_type": "TOPICAL_NEIGHBOR",
+        "why": "Temporal, not necessarily causal"
+      }
+    ],
+    "canonical_seeds": [
+      "leads to",
+      "results in",
+      "causes",
+      "brings about"
+    ]
+  },
+  "ARG_STYLE.concession_refute": {
+    "parent_appeal": "Logos",
+    "parent_dimension": "Argumentation",
+    "parent_subfeature": "style_sophistication",
+    "function": "Two-part markers that first concede an opposing point and then refute it — the central pattern of refutational two-sided argumentation.",
+    "theory_anchor": "O'Keefe (1999) refutational two-sided messages; Allen (1991) meta-analysis.",
+    "include": [
+      "Concession openers (admittedly, granted, true that, while it is true)",
+      "Refutation pivots that follow concession (however, nevertheless, but, still)",
+      "Combined fixed-phrase patterns ('it may be that X, but Y')"
+    ],
+    "exclude": [
+      "Pure contrastive markers without prior concession (just 'however' alone — that's LOGIC_CONTRAST)",
+      "Counter-claim openers without concession (instead, on the contrary)"
+    ],
+    "common_drift_traps": [
+      {
+        "word": "instead",
+        "drift_type": "TOPICAL_NEIGHBOR",
+        "why": "Counter-claim opener, no concession move"
+      },
+      {
+        "word": "however",
+        "drift_type": "HYPERNYM_DILUTION",
+        "why": "Standalone contrast; admit only as the refutation pivot in concession+refute pattern"
+      }
+    ],
+    "canonical_seeds": [
+      "admittedly",
+      "granted",
+      "true that",
+      "while it is true"
+    ]
+  },
+  "ARG_STYLE.conditional": {
+    "parent_appeal": "Logos",
+    "parent_dimension": "Argumentation",
+    "parent_subfeature": "style_sophistication",
+    "function": "Conditional reasoning markers that introduce hypothetical or counterfactual argumentation (if X then Y).",
+    "theory_anchor": "Conditional reasoning as deductive sophistication marker.",
+    "include": [
+      "Conditional subordinators (if, unless, provided that, assuming that, in case)",
+      "Counterfactual markers (had it been, were it not for, suppose that)",
+      "Apodosis introducers (then, would, would have)"
+    ],
+    "exclude": [
+      "Pure temporal 'when' without hypothetical force",
+      "'Whether' as alternative-listing rather than conditional"
+    ],
+    "common_drift_traps": [
+      {
+        "word": "when",
+        "drift_type": "POS_DRIFT",
+        "why": "Temporal use is more common; admit only when clearly conditional"
+      }
+    ],
+    "canonical_seeds": [
+      "if",
+      "unless",
+      "provided that",
+      "suppose that"
+    ]
+  },
+  "ARG_STYLE.counter": {
+    "parent_appeal": "Logos",
+    "parent_dimension": "Argumentation",
+    "parent_subfeature": "style_sophistication",
+    "function": "Markers that introduce a counter-argument or alternative perspective (acknowledging opposing views as part of argumentative balance).",
+    "theory_anchor": "Refutational two-sided messages (O'Keefe 1999); preemptive resolution of receiver objections.",
+    "include": [
+      "Counter-introducers (although, though, however, granted, while [contrastive])",
+      "Phrasal counter-markers (on the other hand, by contrast, that said, even so)",
+      "Acknowledgment-style openers (admittedly, of course)"
+    ],
+    "exclude": [
+      "Pure additive markers (also, moreover) — no counter function",
+      "Pure causal markers"
+    ],
+    "common_drift_traps": [
+      {
+        "word": "moreover",
+        "drift_type": "VALENCE_FLIP",
+        "why": "Additive, not counter"
+      }
+    ],
+    "canonical_seeds": [
+      "although",
+      "however",
+      "granted",
+      "though"
+    ]
+  },
+  "ARG_STYLE.definition": {
+    "parent_appeal": "Logos",
+    "parent_dimension": "Argumentation",
+    "parent_subfeature": "style_sophistication",
+    "function": "Markers that introduce a DEFINITIONAL or clarificatory move within an argument (X is defined as, by X we mean).",
+    "theory_anchor": "Definition as argument scheme (Walton); reduces ambiguity.",
+    "include": [
+      "Definitional copular markers ('is defined as', 'means', 'refers to', 'is a')",
+      "Clarification markers (in other words, that is, i.e., namely)",
+      "Term-introduction phrases (we call this, by X we mean)"
+    ],
+    "exclude": [
+      "Generic copula 'is' without definitional function (e.g., 'the sky is blue' is not a definition move)",
+      "Examplification markers (for example, e.g.) — those belong to ARG_STYLE.example"
+    ],
+    "common_drift_traps": [
+      {
+        "word": "for example",
+        "drift_type": "TOPICAL_NEIGHBOR",
+        "why": "Exemplification, not definition"
+      }
+    ],
+    "canonical_seeds": [
+      "is defined as",
+      "means",
+      "refers to",
+      "in other words",
+      "namely"
+    ]
+  },
+  "ARG_STYLE.example": {
+    "parent_appeal": "Logos",
+    "parent_dimension": "Argumentation",
+    "parent_subfeature": "style_sophistication",
+    "function": "Markers that introduce a concrete EXAMPLE or instance to support a general claim.",
+    "theory_anchor": "Exemplification Theory (Bigsby 2019); vivid examples enhance perceived issue severity.",
+    "include": [
+      "Example introducers (for example, for instance, e.g., such as, including)",
+      "Case introducers (a case in point, take X for instance, consider the case of)",
+      "Illustration markers (to illustrate, by way of illustration)"
+    ],
+    "exclude": [
+      "Definitional markers (i.e., namely) — those belong to ARG_STYLE.definition",
+      "Pure additive markers without exemplifying function"
+    ],
+    "common_drift_traps": [
+      {
+        "word": "i.e.",
+        "drift_type": "TOPICAL_NEIGHBOR",
+        "why": "Definitional clarification, not exemplification"
+      }
+    ],
+    "canonical_seeds": [
+      "for example",
+      "for instance",
+      "e.g.",
+      "such as"
+    ]
+  },
+  "SPEC_ANCHORS": {
+    "parent_appeal": "Logos",
+    "parent_dimension": "Specificity",
+    "parent_subfeature": "lexical_concreteness",
+    "function": "Specification anchors that bind a general claim to a CONCRETE referent or instance (specifically, namely, particularly).",
+    "theory_anchor": "Construal Level Theory (Trope & Liberman); concrete language increases perceived truth (Hansen & Wänke 2010).",
+    "include": [
+      "Specificity adverbs (specifically, namely, particularly, especially, notably, in particular)",
+      "Concretization phrases (to be specific, more precisely, in concrete terms)",
+      "Instance-introducers when used to specify rather than exemplify (such as)"
+    ],
+    "exclude": [
+      "Pure exemplification (for example, e.g.) — belongs to ARG_STYLE.example unless specifying",
+      "Pure additive markers"
+    ],
+    "common_drift_traps": [
+      {
+        "word": "for example",
+        "drift_type": "TOPICAL_NEIGHBOR",
+        "why": "Exemplification, not specification anchor"
+      }
+    ],
+    "canonical_seeds": [
+      "specifically",
+      "namely",
+      "particularly",
+      "in particular"
+    ]
+  },
+  "SPEC_PSYCH_NEAR": {
+    "parent_appeal": "Logos",
+    "parent_dimension": "Specificity",
+    "parent_subfeature": "psychological_nearness",
+    "function": "Markers of psychological PROXIMITY in time, space, or social distance (now, here, this, today, immediate).",
+    "theory_anchor": "Construal Level Theory; near-construal triggers concrete processing.",
+    "include": [
+      "Temporal nearness (now, today, currently, presently, this minute/hour/day/week)",
+      "Spatial nearness (here, nearby, local, this place)",
+      "Demonstrative-near (this, these) when used in deictic spatial/temporal sense"
+    ],
+    "exclude": [
+      "Distance markers (someday, distant, that, those) — belong to SPEC_PSYCH_FAR",
+      "Vague quantifiers (often, many) — belong to SPEC_VAGUE",
+      "Discourse anaphora 'this/that' (referring to prior text) — belong to LOGIC_REFERENCE"
+    ],
+    "common_drift_traps": [
+      {
+        "word": "future",
+        "drift_type": "VALENCE_FLIP",
+        "why": "Far-distant temporal marker"
+      },
+      {
+        "word": "often",
+        "drift_type": "TOPICAL_NEIGHBOR",
+        "why": "Vague frequency, not proximity"
+      }
+    ],
+    "canonical_seeds": [
+      "now",
+      "here",
+      "today",
+      "this",
+      "immediately"
+    ]
+  },
+  "SPEC_PSYCH_FAR": {
+    "parent_appeal": "Logos",
+    "parent_dimension": "Specificity",
+    "parent_subfeature": "psychological_nearness",
+    "function": "Markers of psychological DISTANCE in time, space, or social distance (someday, distant, those, eventually). Inverse signal of psychological nearness.",
+    "theory_anchor": "Construal Level Theory; far-construal triggers abstract processing.",
+    "include": [
+      "Temporal distance (eventually, someday, in the long run, decades from now, century)",
+      "Spatial distance (distant, far, remote, abroad)",
+      "Demonstrative-far (that, those) when used in deictic distancing sense"
+    ],
+    "exclude": [
+      "Near markers — belong to SPEC_PSYCH_NEAR",
+      "Discourse anaphora 'that/those' (referring to prior text) — belong to LOGIC_REFERENCE"
+    ],
+    "common_drift_traps": [
+      {
+        "word": "now",
+        "drift_type": "VALENCE_FLIP",
+        "why": "Near, not far"
+      },
+      {
+        "word": "this",
+        "drift_type": "VALENCE_FLIP",
+        "why": "Near deixis"
+      }
+    ],
+    "canonical_seeds": [
+      "distant",
+      "eventually",
+      "someday",
+      "decades",
+      "century"
+    ]
+  },
+  "SPEC_VAGUE": {
+    "parent_appeal": "Logos",
+    "parent_dimension": "Specificity",
+    "parent_subfeature": "lexical_concreteness",
+    "function": "Vague quantifiers and indefinite expressions that REDUCE specificity (some, many, often, several, various). Negative signal in the specificity dimension.",
+    "theory_anchor": "Construal Level Theory; vague language increases abstraction.",
+    "include": [
+      "Vague indefinite quantifiers (some, several, many, few, most, various)",
+      "Vague frequency adverbs (often, usually, sometimes, occasionally, rarely)",
+      "Approximators (about, around, roughly, approximately, nearly)"
+    ],
+    "exclude": [
+      "Concrete numerical quantifiers (three, five, half) — those are specific, opposite signal",
+      "Hedges that are epistemic rather than quantificational (might, could) — belong to HEDGES",
+      "Specification markers (specifically, particularly) — belong to SPEC_ANCHORS"
+    ],
+    "common_drift_traps": [
+      {
+        "word": "specifically",
+        "drift_type": "VALENCE_FLIP",
+        "why": "Specification, not vagueness"
+      },
+      {
+        "word": "three",
+        "drift_type": "VALENCE_FLIP",
+        "why": "Concrete number, not vague"
+      }
+    ],
+    "canonical_seeds": [
+      "some",
+      "many",
+      "often",
+      "several",
+      "various"
+    ]
+  },
+  "AUTHORITY_PHRASE": {
+    "parent_appeal": "Ethos",
+    "parent_dimension": "Authority and Credibility",
+    "parent_subfeature": "phrases",
+    "function": "Lexical anchors used in authority-attribution phrases (e.g., 'according to a study', 'the data shows', 'verified report').",
+    "theory_anchor": "Hovland & Weiss (1951) source credibility; institutional anchors as heuristic credibility cues.",
+    "include": [
+      "Evidence-anchoring nouns (study, data, report, evidence, finding, statistic, testimony)",
+      "Verification markers (verified, confirmed, documented, certified)",
+      "Authoritative source nouns (authority, expert, specialist, scientist, researcher)"
+    ],
+    "exclude": [
+      "Reporting verbs (showed, argued) — belong to REPORTING_VERBS",
+      "Generic communication nouns without authority-bearing function (note, comment)"
+    ],
+    "common_drift_traps": [
+      {
+        "word": "argued",
+        "drift_type": "POS_DRIFT",
+        "why": "Reporting verb; belongs to REPORTING_VERBS"
+      },
+      {
+        "word": "comment",
+        "drift_type": "HYPERNYM_DILUTION",
+        "why": "Generic communication noun without authority weight"
+      }
+    ],
+    "canonical_seeds": [
+      "data",
+      "study",
+      "report",
+      "verified",
+      "testimony"
+    ]
+  },
+  "HEDGES": {
+    "parent_appeal": "Ethos",
+    "parent_dimension": "Authority and Credibility",
+    "parent_subfeature": "speech_power_inverse",
+    "function": "Hedging expressions that soften claims and signal epistemic uncertainty or imprecision (kind of, sort of, possibly, around). INVERSE signal — penalizes speech_power.",
+    "theory_anchor": "Powerless language (Hosman 1989); reduces perceived authority.",
+    "include": [
+      "Approximators (around, approximately, roughly, almost, nearly, broadly)",
+      "Quantity hedges (somewhat, kind of, sort of, a bit)",
+      "Epistemic softeners (apparently, seemingly, more or less)"
+    ],
+    "exclude": [
+      "Strong epistemic uncertainty (might, may, could) — overlap with UNCERTAINTY; admit only as approximation softener",
+      "Hesitations (uh, um) — belong to HESITATIONS",
+      "Non-imposition softeners (please) — belong to PLEASE"
+    ],
+    "common_drift_traps": [
+      {
+        "word": "definitely",
+        "drift_type": "VALENCE_FLIP",
+        "why": "Booster, not hedge"
+      },
+      {
+        "word": "uh",
+        "drift_type": "TOPICAL_NEIGHBOR",
+        "why": "Hesitation marker; belongs to HESITATIONS"
+      }
+    ],
+    "canonical_seeds": [
+      "around",
+      "kind of",
+      "approximately",
+      "roughly",
+      "somewhat"
+    ]
+  },
+  "HESITATIONS": {
+    "parent_appeal": "Ethos",
+    "parent_dimension": "Authority and Credibility",
+    "parent_subfeature": "speech_power_inverse",
+    "function": "Disfluencies and hesitation markers that signal speaker uncertainty in real-time production (uh, um, well, you know).",
+    "theory_anchor": "Powerless language (Erickson et al. 1978); disfluency reduces perceived competence.",
+    "include": [
+      "Filled-pause disfluencies (uh, um, er, ah, hmm)",
+      "Stalling discourse markers (well, like [stalling], you know [stalling])",
+      "Restart markers (I mean, that is to say [as restart])"
+    ],
+    "exclude": [
+      "Approximators (around, kind of) — belong to HEDGES",
+      "Politeness fillers (excuse me, sorry) — belong to Apology / COURTESY"
+    ],
+    "common_drift_traps": [
+      {
+        "word": "around",
+        "drift_type": "TOPICAL_NEIGHBOR",
+        "why": "Approximator hedge, not hesitation"
+      }
+    ],
+    "canonical_seeds": [
+      "uh",
+      "um",
+      "well",
+      "you know",
+      "I mean"
+    ]
+  },
+  "UNCERTAINTY": {
+    "parent_appeal": "Ethos",
+    "parent_dimension": "Authority and Credibility",
+    "parent_subfeature": "speech_power_inverse",
+    "function": "Epistemic uncertainty markers that signal the speaker's lack of full commitment to a proposition (allegedly, may, might, possibly, seem). INVERSE signal — reduces speech_power.",
+    "theory_anchor": "Powerless language; epistemic modality as commitment-reduction cue.",
+    "include": [
+      "Epistemic modal verbs (may, might, could, would, should as epistemic, can as epistemic)",
+      "Epistemic adverbs (allegedly, apparently, perhaps, possibly, presumably, seemingly)",
+      "Epistemic verbs (seem, appear, indicate, suggest, suspect, presume, suppose)",
+      "Uncertainty adjectives (uncertain, unsure, possible, probable, questionable)"
+    ],
+    "exclude": [
+      "Quantity hedges (around, kind of) — belong to HEDGES",
+      "Disfluencies (uh, um) — belong to HESITATIONS",
+      "Pure deontic modals (must, should as obligation) — those are DOMINEERING",
+      "Booster adverbs (definitely, certainly, surely) — belong to Actually"
+    ],
+    "common_drift_traps": [
+      {
+        "word": "definitely",
+        "drift_type": "VALENCE_FLIP",
+        "why": "Booster (high commitment), opposite of uncertainty"
+      },
+      {
+        "word": "must",
+        "drift_type": "VALENCE_FLIP",
+        "why": "Deontic obligation, not epistemic uncertainty"
+      }
+    ],
+    "canonical_seeds": [
+      "may",
+      "might",
+      "perhaps",
+      "possibly",
+      "allegedly",
+      "seem"
+    ]
+  },
+  "Actually": {
+    "parent_appeal": "Ethos",
+    "parent_dimension": "Authority and Credibility",
+    "parent_subfeature": "speech_power_positive",
+    "function": "Assertive / asseverative discourse markers that boost epistemic commitment and project speaker confidence (actually, honestly, really, surely). Positive end of speech_power.",
+    "theory_anchor": "Powerful language (Hosman 1989); booster adverbs increase perceived authority.",
+    "include": [
+      "Truth-asseverative adverbs (actually, really, truly, honestly, frankly)",
+      "Certainty boosters (surely, certainly, definitely, undoubtedly, indeed, absolutely)",
+      "Reality-anchoring markers (in fact, in truth, no doubt)"
+    ],
+    "exclude": [
+      "Epistemic uncertainty markers (perhaps, maybe) — belong to UNCERTAINTY",
+      "Hedges (kind of, around) — belong to HEDGES",
+      "Generic intensifiers (very, so) — belong to SENT_INTENSITY.weak"
+    ],
+    "common_drift_traps": [
+      {
+        "word": "perhaps",
+        "drift_type": "VALENCE_FLIP",
+        "why": "Uncertainty marker, opposite valence"
+      },
+      {
+        "word": "very",
+        "drift_type": "TOPICAL_NEIGHBOR",
+        "why": "Generic intensifier, not assertive booster"
+      }
+    ],
+    "canonical_seeds": [
+      "actually",
+      "really",
+      "honestly",
+      "surely",
+      "in fact"
+    ]
+  },
+  "COURTESY": {
+    "parent_appeal": "Ethos",
+    "parent_dimension": "Politeness",
+    "parent_subfeature": "professional_courtesy",
+    "function": "Generic professional courtesy markers expressing respect, deference, or polite attention (sir, ma'am, kindly, respectfully, dear).",
+    "theory_anchor": "Brown & Levinson (1987) face-saving; mitigates Face Threatening Acts.",
+    "include": [
+      "Honorifics and address terms (sir, ma'am, madam, dear, respected)",
+      "Polite adverbs (kindly, respectfully, graciously, courteously)",
+      "Deferential phrasal markers (with all due respect, if I may)"
+    ],
+    "exclude": [
+      "Apologies — belong to Apology",
+      "Thanks — belong to THANKS",
+      "Greetings — belong to Greeting",
+      "Polite request softeners (please) — belong to PLEASE"
+    ],
+    "common_drift_traps": [
+      {
+        "word": "thanks",
+        "drift_type": "TOPICAL_NEIGHBOR",
+        "why": "Belongs to THANKS"
+      }
+    ],
+    "canonical_seeds": [
+      "sir",
+      "kindly",
+      "respectfully",
+      "with all due respect"
+    ]
+  },
+  "Apology": {
+    "parent_appeal": "Ethos",
+    "parent_dimension": "Politeness",
+    "parent_subfeature": "professional_courtesy",
+    "function": "Apology markers and regret expressions that mitigate face-threatening moves (sorry, apologize, my apologies, regret).",
+    "theory_anchor": "Brown & Levinson face-redress.",
+    "include": [
+      "Direct apology verbs / nouns (apologize, sorry, regret, my bad)",
+      "Apology phrasal forms (I apologize, my apologies, please forgive)",
+      "Excuse-me variants (excuse me, pardon, beg your pardon)"
+    ],
+    "exclude": [
+      "Generic courtesy (kindly, sir) — belong to COURTESY",
+      "Sympathy without speaker fault (condolences) — borderline; reject if no apology function"
+    ],
+    "common_drift_traps": [
+      {
+        "word": "thanks",
+        "drift_type": "TOPICAL_NEIGHBOR",
+        "why": "Gratitude, not apology"
+      }
+    ],
+    "canonical_seeds": [
+      "sorry",
+      "apologize",
+      "my apologies",
+      "excuse me"
+    ]
+  },
+  "THANKS": {
+    "parent_appeal": "Ethos",
+    "parent_dimension": "Politeness",
+    "parent_subfeature": "professional_courtesy",
+    "function": "Gratitude and appreciation markers (thanks, thank you, appreciate, grateful).",
+    "theory_anchor": "Brown & Levinson positive politeness.",
+    "include": [
+      "Direct gratitude expressions (thanks, thank you, thank-you, ty)",
+      "Appreciation verbs (appreciate, am grateful, am thankful)",
+      "Phrasal gratitude (much obliged, many thanks)"
+    ],
+    "exclude": [
+      "Apologies — belong to Apology",
+      "Greetings — belong to Greeting"
+    ],
+    "common_drift_traps": [
+      {
+        "word": "sorry",
+        "drift_type": "TOPICAL_NEIGHBOR",
+        "why": "Apology, not gratitude"
+      }
+    ],
+    "canonical_seeds": [
+      "thanks",
+      "thank you",
+      "appreciate",
+      "grateful"
+    ]
+  },
+  "Greeting": {
+    "parent_appeal": "Ethos",
+    "parent_dimension": "Politeness",
+    "parent_subfeature": "professional_courtesy",
+    "function": "Greeting and salutation markers that open or close interactions (hello, hi, good morning, regards).",
+    "theory_anchor": "Brown & Levinson positive politeness; phatic communion.",
+    "include": [
+      "Opening greetings (hello, hi, hey, greetings, good morning/afternoon/evening)",
+      "Closing salutations (regards, sincerely, best, cheers, take care)",
+      "Vocative-style address openers (dear sir/madam)"
+    ],
+    "exclude": [
+      "Honorifics not in salutation context — belong to COURTESY",
+      "Filler interjections without greeting function"
+    ],
+    "common_drift_traps": [
+      {
+        "word": "kindly",
+        "drift_type": "TOPICAL_NEIGHBOR",
+        "why": "Courtesy adverb, not greeting"
+      }
+    ],
+    "canonical_seeds": [
+      "hello",
+      "hi",
+      "good morning",
+      "regards"
+    ]
+  },
+  "PLEASE": {
+    "parent_appeal": "Ethos",
+    "parent_dimension": "Politeness",
+    "parent_subfeature": "non_imposition",
+    "function": "Request softeners that mitigate imposition on the addressee (please, kindly, would you mind, could you).",
+    "theory_anchor": "Brown & Levinson negative politeness; non-imposition strategies.",
+    "include": [
+      "Direct softeners (please, kindly, do please)",
+      "Indirect request frames (would you mind, could you possibly, if you could)",
+      "Phrasal politeness (if it's not too much trouble, when you have a moment)"
+    ],
+    "exclude": [
+      "Hedges that are not request-bound (around, kind of) — belong to HEDGES",
+      "Apologies — belong to Apology"
+    ],
+    "common_drift_traps": [
+      {
+        "word": "kind of",
+        "drift_type": "TOPICAL_NEIGHBOR",
+        "why": "Quantity hedge, not request softener"
+      }
+    ],
+    "canonical_seeds": [
+      "please",
+      "kindly",
+      "would you mind",
+      "could you"
+    ]
+  },
+  "RAPPORT": {
+    "parent_appeal": "Ethos",
+    "parent_dimension": "Politeness",
+    "parent_subfeature": "rapport_building",
+    "function": "Rapport-building markers that explicitly endorse the interlocutor's contribution or signal alignment with their position (good point, well said, totally agree, I appreciate). The construct requires direct addressee-directedness; bare positive adjectives that could equally describe a topic do NOT qualify.",
+    "theory_anchor": "Spencer-Oatey (2008) rapport management; positive politeness solidarity strategies.",
+    "include": [
+      "Endorsement phrases evaluating the interlocutor's contribution (good point, fair point, well said, nicely put, I see what you mean)",
+      "Explicit alignment markers (totally agree, fair enough, you're right, that's true)",
+      "Addressee-directed appreciation (I appreciate that, thank you for sharing, you make a strong case)",
+      "Encouragement markers (keep it up, that's a good idea)"
+    ],
+    "exclude": [
+      "Bare positive adjectives that can describe any referent (great, excellent, wonderful, amazing, fantastic, brilliant) — they admit topical use ('a great day', 'wonderful weather') and so fail the addressee-directedness test",
+      "Pure positive sentiment about non-interlocutor topics (this is great, that sounds wonderful)",
+      "Generic positive evaluatives without solidarity function (beautiful, lovely, fine, nice)",
+      "Conversational fillers (you know, right?) — belong to Filler",
+      "Greetings and closings — belong to Greeting",
+      "Apologies and thanks unrelated to the interlocutor's argumentative move — belong to Apology / THANKS"
+    ],
+    "common_drift_traps": [
+      {
+        "word": "great",
+        "drift_type": "HYPERNYM_DILUTION",
+        "why": "Bare adjective; admits non-addressee uses ('a great day') and lacks solidarity-building function on its own"
+      },
+      {
+        "word": "excellent",
+        "drift_type": "HYPERNYM_DILUTION",
+        "why": "Bare evaluative adjective; admit only when bound to an addressee referent (e.g., 'excellent point')"
+      },
+      {
+        "word": "wonderful",
+        "drift_type": "TOPICAL_NEIGHBOR",
+        "why": "Generic positive sentiment; routinely modifies non-interlocutor topics"
+      },
+      {
+        "word": "amazing",
+        "drift_type": "HYPERNYM_DILUTION",
+        "why": "Bare adjective; lacks addressee-directed solidarity component"
+      },
+      {
+        "word": "beautiful",
+        "drift_type": "TOPICAL_NEIGHBOR",
+        "why": "Generic positive evaluation, not rapport-building"
+      },
+      {
+        "word": "nice",
+        "drift_type": "HYPERNYM_DILUTION",
+        "why": "Too generic; lacks addressee-directed solidarity function"
+      }
+    ],
+    "canonical_seeds": [
+      "good point",
+      "well said",
+      "totally agree",
+      "fair enough",
+      "I appreciate",
+      "supportive"
+    ]
+  },
+  "Filler": {
+    "parent_appeal": "Ethos",
+    "parent_dimension": "Politeness",
+    "parent_subfeature": "rapport_building",
+    "function": "Conversational fillers and rapport-oriented discourse markers that build interpersonal rapport (you know, right?, I see, yeah).",
+    "theory_anchor": "Rapport management (Spencer-Oatey 2008).",
+    "include": [
+      "Phatic conversational fillers (you know, you see, I mean [non-restart], right?, okay)",
+      "Backchannel-style markers (yeah, mhm, mm)",
+      "Acknowledgment markers in conversational mode (alright, sure)"
+    ],
+    "exclude": [
+      "Hesitation disfluencies (uh, um) — belong to HESITATIONS",
+      "Topic-shift connectives (by the way) — belong to By.The.Way",
+      "Substantive discourse markers (so, anyway as topic-shifters)"
+    ],
+    "common_drift_traps": [
+      {
+        "word": "uh",
+        "drift_type": "TOPICAL_NEIGHBOR",
+        "why": "Hesitation, not rapport filler"
+      },
+      {
+        "word": "btw",
+        "drift_type": "TOPICAL_NEIGHBOR",
+        "why": "Topic-shifter; belongs to By.The.Way"
+      }
+    ],
+    "canonical_seeds": [
+      "you know",
+      "right?",
+      "I see",
+      "yeah",
+      "okay"
+    ]
+  },
+  "By.The.Way": {
+    "parent_appeal": "Ethos",
+    "parent_dimension": "Politeness",
+    "parent_subfeature": "rapport_building",
+    "function": "Topic-shift and parenthetical conversational connectors (by the way, btw, incidentally, anyway).",
+    "theory_anchor": "Discourse management for rapport (Schiffrin 1987).",
+    "include": [
+      "Topic-shifters (by the way, btw, incidentally)",
+      "Parenthetical openers (speaking of which, on a side note, that reminds me)",
+      "Closing topic-managers (anyway, anyhow [topic-shift use])"
+    ],
+    "exclude": [
+      "Pure conversational fillers without topic-shift function — belong to Filler",
+      "Logical connectives (however, therefore)"
+    ],
+    "common_drift_traps": [
+      {
+        "word": "however",
+        "drift_type": "TOPICAL_NEIGHBOR",
+        "why": "Logical contrast, not topic-shift"
+      }
+    ],
+    "canonical_seeds": [
+      "by the way",
+      "btw",
+      "incidentally",
+      "anyway"
+    ]
+  },
+  "DOMINEERING": {
+    "parent_appeal": "Ethos",
+    "parent_dimension": "Politeness",
+    "parent_subfeature": "domineering_inverse",
+    "function": "Coercive / commanding language that imposes on the addressee (must, have to, you should, I demand). INVERSE signal — penalizes politeness.",
+    "theory_anchor": "Brown & Levinson; coercive force triggers psychological reactance (Brehm 1966).",
+    "include": [
+      "Strong deontic modals (must, have to, has to, ought to, need to)",
+      "Direct imperative formulations (you should, I demand, I insist, you will)",
+      "Coercive verb phrases (require, force, compel, mandate)"
+    ],
+    "exclude": [
+      "Polite request forms (please, kindly) — belong to PLEASE",
+      "Epistemic 'must' (he must be tired) — admit only deontic / commanding use",
+      "Modal advice without coercion (you might want to)"
+    ],
+    "common_drift_traps": [
+      {
+        "word": "please",
+        "drift_type": "VALENCE_FLIP",
+        "why": "Polite softener, not coercive"
+      },
+      {
+        "word": "may",
+        "drift_type": "VALENCE_FLIP",
+        "why": "Permissive, opposite of coercive"
+      }
+    ],
+    "canonical_seeds": [
+      "must",
+      "have to",
+      "ought to",
+      "I demand"
+    ]
+  },
+  "COMMITMENT": {
+    "parent_appeal": "Ethos",
+    "parent_dimension": "Commitment",
+    "parent_subfeature": "statements",
+    "function": "Explicit commitment markers signalling speaker resolve and prior investment (I promise, I will, we pledge, we commit, count on me).",
+    "theory_anchor": "Foot-in-the-Door consistency mechanism (Burger 1999); Pallak et al. (1980) verifiable commitment.",
+    "include": [
+      "First-person commitment performatives (I promise, I pledge, I commit, I assure, I guarantee, I vow)",
+      "Plural-collective commitment (we promise, we will, we commit ourselves to)",
+      "Investment-of-effort markers (we have invested, we are dedicated to, we stand by)"
+    ],
+    "exclude": [
+      "Pure collective-identity markers without commitment performative (together, jointly) — those mark mutuality not commitment",
+      "Generic positive future statements without speaker-binding force",
+      "Mutual exchange framings (win-win, mutual) — belong to REC_MUTUAL_EXCHANGE"
+    ],
+    "common_drift_traps": [
+      {
+        "word": "together",
+        "drift_type": "TOPICAL_NEIGHBOR",
+        "why": "Collective identity, not commitment performative"
+      },
+      {
+        "word": "mutual",
+        "drift_type": "TOPICAL_NEIGHBOR",
+        "why": "Mutuality framing; belongs to REC_MUTUAL_EXCHANGE"
+      },
+      {
+        "word": "partnership",
+        "drift_type": "TOPICAL_NEIGHBOR",
+        "why": "Mutual exchange noun, not commitment statement"
+      }
+    ],
+    "canonical_seeds": [
+      "I promise",
+      "I pledge",
+      "I commit",
+      "we will",
+      "I guarantee"
+    ]
+  },
+  "COMMITMENT_PROOF": {
+    "parent_appeal": "Ethos",
+    "parent_dimension": "Commitment",
+    "parent_subfeature": "power",
+    "function": "Markers indicating that a commitment statement is supported by VERIFIABLE proof of action (documented, recorded, on file, evidenced).",
+    "theory_anchor": "Pallak et al. (1980) commitment is strongest when socially verifiable.",
+    "include": [
+      "Documentation markers (documented, recorded, logged, on file, archived)",
+      "Witness/verification markers (witnessed, verified, certified, signed-off)",
+      "Public-record markers (published, registered, filed)"
+    ],
+    "exclude": [
+      "General authority markers without proof-of-commitment function — belong to AUTHORITY_PHRASE",
+      "Commitment statements themselves (I promise) — belong to COMMITMENT"
+    ],
+    "common_drift_traps": [
+      {
+        "word": "promise",
+        "drift_type": "TOPICAL_NEIGHBOR",
+        "why": "Commitment statement, not proof of execution"
+      }
+    ],
+    "canonical_seeds": [
+      "documented",
+      "recorded",
+      "verified",
+      "on file"
+    ]
+  },
+  "SENT_INTENSITY.extreme": {
+    "parent_appeal": "Pathos",
+    "parent_dimension": "Sentiment",
+    "parent_subfeature": "language_intensity",
+    "function": "Words expressing EXTREME affective intensity at the top of the intensity scale (catastrophic, devastating, horrific, monstrous).",
+    "theory_anchor": "Bowers (1964) language intensity; extreme intensity amplifies arousal.",
+    "include": [
+      "Extreme negative-valence intensity (catastrophic, devastating, horrific, monstrous, atrocious, life-threatening)",
+      "Extreme positive-valence intensity (miraculous, phenomenal, extraordinary, unprecedented, mind-blowing)",
+      "Superlative-tier intensifiers (utterly, absolutely [+ extreme adj])"
+    ],
+    "exclude": [
+      "Strong but not extreme intensity (severe, intense) — belong to SENT_INTENSITY.strong",
+      "Moderate intensity (significant, considerable) — belong to SENT_INTENSITY.moderate",
+      "Weak intensifiers (very, pretty) — belong to SENT_INTENSITY.weak"
+    ],
+    "common_drift_traps": [
+      {
+        "word": "severe",
+        "drift_type": "HYPONYM_OVERSHOOT",
+        "why": "Strong, not extreme tier"
+      },
+      {
+        "word": "very",
+        "drift_type": "HYPONYM_OVERSHOOT",
+        "why": "Weak intensifier"
+      }
+    ],
+    "canonical_seeds": [
+      "catastrophic",
+      "devastating",
+      "horrific",
+      "monstrous",
+      "outrageous"
+    ]
+  },
+  "SENT_INTENSITY.strong": {
+    "parent_appeal": "Pathos",
+    "parent_dimension": "Sentiment",
+    "parent_subfeature": "language_intensity",
+    "function": "Words expressing STRONG affective intensity (severe, intense, powerful, dramatic).",
+    "theory_anchor": "Language intensity scale.",
+    "include": [
+      "Strong negative-valence intensity (severe, intense, drastic, grave, serious)",
+      "Strong positive-valence intensity (powerful, profound, remarkable, striking)",
+      "Strong tier intensifying adverbs (deeply, intensely, profoundly)"
+    ],
+    "exclude": [
+      "Extreme tier (catastrophic, devastating) — belong to SENT_INTENSITY.extreme",
+      "Moderate / weak tier intensifiers"
+    ],
+    "common_drift_traps": [
+      {
+        "word": "catastrophic",
+        "drift_type": "HYPONYM_OVERSHOOT",
+        "why": "Extreme tier"
+      },
+      {
+        "word": "moderate",
+        "drift_type": "VALENCE_FLIP",
+        "why": "Moderate tier"
+      }
+    ],
+    "canonical_seeds": [
+      "severe",
+      "intense",
+      "drastic",
+      "powerful"
+    ]
+  },
+  "SENT_INTENSITY.moderate": {
+    "parent_appeal": "Pathos",
+    "parent_dimension": "Sentiment",
+    "parent_subfeature": "language_intensity",
+    "function": "Words expressing MODERATE affective intensity (significant, considerable, substantial, notable).",
+    "theory_anchor": "Language intensity scale.",
+    "include": [
+      "Moderate intensifiers (significant, considerable, substantial, notable, marked)",
+      "Moderate-tier adverbs (significantly, considerably, notably, markedly)",
+      "Mid-scale evaluatives (important, meaningful, relevant)"
+    ],
+    "exclude": [
+      "Strong / extreme tier",
+      "Weak tier (pretty, quite, very)"
+    ],
+    "common_drift_traps": [
+      {
+        "word": "very",
+        "drift_type": "HYPONYM_OVERSHOOT",
+        "why": "Weak tier"
+      },
+      {
+        "word": "severe",
+        "drift_type": "HYPONYM_OVERSHOOT",
+        "why": "Strong tier"
+      }
+    ],
+    "canonical_seeds": [
+      "significant",
+      "considerable",
+      "substantial",
+      "notable"
+    ]
+  },
+  "SENT_INTENSITY.weak": {
+    "parent_appeal": "Pathos",
+    "parent_dimension": "Sentiment",
+    "parent_subfeature": "language_intensity",
+    "function": "Generic / weak intensifiers at the bottom of the intensity scale (very, pretty, quite, so, really).",
+    "theory_anchor": "Language intensity scale; weak boosters carry low arousal.",
+    "include": [
+      "Generic intensifiers (very, so, quite, pretty, really [as intensifier])",
+      "Mild boosters (rather, fairly, somewhat [as booster])"
+    ],
+    "exclude": [
+      "Stronger tiers (significant, severe, catastrophic)",
+      "Hedges with reductive function (around, kind of [as approximators]) — belong to HEDGES",
+      "Asseverative markers (really [as truth marker]) — belong to Actually"
+    ],
+    "common_drift_traps": [
+      {
+        "word": "really",
+        "drift_type": "POS_DRIFT",
+        "why": "Polysemous: intensifier vs. asseverative — only intensifier use qualifies"
+      },
+      {
+        "word": "significant",
+        "drift_type": "HYPONYM_OVERSHOOT",
+        "why": "Moderate tier"
+      }
+    ],
+    "canonical_seeds": [
+      "very",
+      "quite",
+      "pretty",
+      "so"
+    ]
+  },
+  "FIGHTING": {
+    "parent_appeal": "Pathos",
+    "parent_dimension": "Sentiment",
+    "parent_subfeature": "anger",
+    "function": "Combative / aggressive language (verbs of attack and slur-style insults) signaling hostile, anger-laden registers (annihilate, attack, idiot, garbage).",
+    "theory_anchor": "LIWC anger; combative discourse as anger expression.",
+    "include": [
+      "Aggressive action verbs (annihilate, attack, crush, destroy, obliterate, bulldoze, demolish)",
+      "Pejorative epithets used as labels (idiot, fool, stupid, garbage, trash, nonsense, ridiculous)",
+      "Hostility-coded adjectives (vicious, savage, brutal)"
+    ],
+    "exclude": [
+      "Pure name-calling labels with propaganda-target framing (traitor, terrorist, puppet) — belong to PROP_NAMECALL",
+      "Loaded propaganda epithets with ideological cast (corrupt, evil) — belong to PROP_LOADED",
+      "Neutral combat-domain words used non-pejoratively"
+    ],
+    "common_drift_traps": [
+      {
+        "word": "traitor",
+        "drift_type": "TOPICAL_NEIGHBOR",
+        "why": "Propaganda name-calling; belongs to PROP_NAMECALL"
+      },
+      {
+        "word": "evil",
+        "drift_type": "TOPICAL_NEIGHBOR",
+        "why": "Loaded ideological epithet; belongs to PROP_LOADED"
+      }
+    ],
+    "canonical_seeds": [
+      "annihilate",
+      "attack",
+      "idiot",
+      "garbage",
+      "ridiculous"
+    ]
+  },
+  "IMPACT_GAIN": {
+    "parent_appeal": "Pathos",
+    "parent_dimension": "Impact",
+    "parent_subfeature": "gain_framing",
+    "function": "Words framing future or present consequences as GAINS, benefits, or improvements (benefit, advantage, improve, prosperity).",
+    "theory_anchor": "Prospect Theory (Tversky & Kahneman 1981); gain-framed messages.",
+    "include": [
+      "Gain nouns (benefit, advantage, gain, opportunity, growth, success, prosperity, reward, relief)",
+      "Improvement verbs (improve, enhance, accomplish, flourish, thrive, win)",
+      "Positive-direction quantitative verbs in gain context (increase [as gain], reduce [costs/risks])"
+    ],
+    "exclude": [
+      "Loss / cost language (loss, harm, damage) — belong to IMPACT_LOSS",
+      "Threat language (catastrophic, deadly) — belong to IMPACT_THREAT",
+      "Pure positive sentiment without consequence framing (happy, nice)"
+    ],
+    "common_drift_traps": [
+      {
+        "word": "harm",
+        "drift_type": "VALENCE_FLIP",
+        "why": "Loss frame"
+      },
+      {
+        "word": "happy",
+        "drift_type": "TOPICAL_NEIGHBOR",
+        "why": "Positive emotion, not consequence frame"
+      }
+    ],
+    "canonical_seeds": [
+      "benefit",
+      "advantage",
+      "improve",
+      "growth",
+      "success"
+    ]
+  },
+  "IMPACT_LOSS": {
+    "parent_appeal": "Pathos",
+    "parent_dimension": "Impact",
+    "parent_subfeature": "loss_framing",
+    "function": "Words framing future or present consequences as LOSSES, costs, or harms (loss, cost, damage, harm, sacrifice).",
+    "theory_anchor": "Prospect Theory; loss-framed messages and loss aversion.",
+    "include": [
+      "Loss nouns (loss, cost, damage, harm, deficit, penalty, sacrifice, waste, suffering, pain)",
+      "Loss verbs (lose, deprive, sacrifice, suffer)",
+      "Negative-direction outcome words (failure, decline)"
+    ],
+    "exclude": [
+      "Threat / catastrophe language (deadly, catastrophic) — belong to IMPACT_THREAT",
+      "Gain language — opposite frame",
+      "Pure negative sentiment without consequence framing (sad, unhappy)"
+    ],
+    "common_drift_traps": [
+      {
+        "word": "benefit",
+        "drift_type": "VALENCE_FLIP",
+        "why": "Gain frame"
+      },
+      {
+        "word": "catastrophic",
+        "drift_type": "HYPONYM_OVERSHOOT",
+        "why": "Threat severity tier; belongs to IMPACT_THREAT"
+      }
+    ],
+    "canonical_seeds": [
+      "cost",
+      "loss",
+      "damage",
+      "harm",
+      "sacrifice"
+    ]
+  },
+  "IMPACT_THREAT": {
+    "parent_appeal": "Pathos",
+    "parent_dimension": "Impact",
+    "parent_subfeature": "threat_severity",
+    "function": "High-severity threat and harm markers signaling catastrophic / fatal consequences (catastrophic, deadly, disaster, crisis).",
+    "theory_anchor": "Witte & Allen (2000) fear appeals; threat severity is a core EPPM input.",
+    "include": [
+      "Catastrophe nouns (disaster, crisis, catastrophe, emergency, calamity, ruin)",
+      "Severity adjectives (catastrophic, deadly, fatal, severe, devastating, terrible, dire)",
+      "Collapse / destruction nouns (collapse, destruction, annihilation)"
+    ],
+    "exclude": [
+      "Generic loss markers without severity (cost, harm) — belong to IMPACT_LOSS",
+      "Generic negative sentiment (bad, unfortunate)",
+      "Fear-emotion words (afraid, scared) — belong to PROP_FEAR / Sentiment.fear"
+    ],
+    "common_drift_traps": [
+      {
+        "word": "harm",
+        "drift_type": "HYPERNYM_DILUTION",
+        "why": "Generic loss; not high-severity threat"
+      },
+      {
+        "word": "afraid",
+        "drift_type": "TOPICAL_NEIGHBOR",
+        "why": "Fear emotion, not threat severity marker"
+      }
+    ],
+    "canonical_seeds": [
+      "catastrophic",
+      "disaster",
+      "crisis",
+      "deadly",
+      "devastating"
+    ]
+  },
+  "IMPACT_WILL": {
+    "parent_appeal": "Pathos",
+    "parent_dimension": "Impact",
+    "parent_subfeature": "future_projection",
+    "function": "Future-tense markers and forward-projection cues that locate consequences in the future (will, shall, gonna, future, ahead, next).",
+    "theory_anchor": "Kim et al. (2025) gain/loss framing × future certainty; future projection amplifies framing.",
+    "include": [
+      "Future modal auxiliaries (will, shall, gonna, going to, 'll)",
+      "Future-time nouns and adverbs (future, next, ahead, tomorrow, soon, later)",
+      "Forward-projection phrasal markers (in the years to come, in the long run)"
+    ],
+    "exclude": [
+      "Past-tense markers (was, did, ago)",
+      "Present markers (now, today) — belong to SPEC_PSYCH_NEAR",
+      "Far-distant temporal (decades, century) — admit only in projection-frame"
+    ],
+    "common_drift_traps": [
+      {
+        "word": "ago",
+        "drift_type": "VALENCE_FLIP",
+        "why": "Past, not future"
+      },
+      {
+        "word": "now",
+        "drift_type": "TOPICAL_NEIGHBOR",
+        "why": "Present, not future"
+      }
+    ],
+    "canonical_seeds": [
+      "will",
+      "shall",
+      "future",
+      "ahead",
+      "next"
+    ]
+  },
+  "REC_CONCESSION": {
+    "parent_appeal": "Pathos",
+    "parent_dimension": "Reciprocity",
+    "parent_subfeature": "concession_framing",
+    "function": "Markers framing the speaker as making a CONCESSION or sacrifice to the addressee, triggering reciprocal obligation (compromise, give in, meet halfway).",
+    "theory_anchor": "Door-in-the-Face (Cialdini 1975; O'Keefe 1998); reciprocal concession.",
+    "include": [
+      "Concession verbs/nouns in reciprocal frame (concede, give in, yield, compromise, meet halfway)",
+      "Sacrifice-framing markers (I'll sacrifice, willing to give up, make an exception for you)",
+      "Soft-concession phrasal markers (this once, just for you, I can do this for you)"
+    ],
+    "exclude": [
+      "Argumentative concessions (admittedly, granted) — belong to ARG_STYLE.concession_refute",
+      "Pure agreement without sacrifice signal (I agree)"
+    ],
+    "common_drift_traps": [
+      {
+        "word": "admittedly",
+        "drift_type": "TOPICAL_NEIGHBOR",
+        "why": "Argumentative concession, not reciprocal"
+      }
+    ],
+    "canonical_seeds": [
+      "compromise",
+      "meet halfway",
+      "give in",
+      "yield"
+    ]
+  },
+  "REC_MUTUAL_EXCHANGE": {
+    "parent_appeal": "Pathos",
+    "parent_dimension": "Reciprocity",
+    "parent_subfeature": "mutual_benefit",
+    "function": "Words framing a proposal as mutually beneficial reciprocal exchange (win-win, mutual, reciprocal, both sides benefit, partnership).",
+    "theory_anchor": "Reciprocity norm (Gouldner 1960); mutual exchange triggers compliance via fairness.",
+    "include": [
+      "Mutuality adjectives / nouns (mutual, reciprocal, bilateral, two-way, win-win, partnership)",
+      "Exchange-framing verbs (exchange, share, trade, partner)",
+      "Both-parties phrasal markers (both sides, all of us, together [as partnership])"
+    ],
+    "exclude": [
+      "One-sided benefit markers — belong to IMPACT_GAIN",
+      "Concession framings — belong to REC_CONCESSION",
+      "Pure 'we' identification without exchange semantics"
+    ],
+    "common_drift_traps": [
+      {
+        "word": "benefit",
+        "drift_type": "TOPICAL_NEIGHBOR",
+        "why": "Generic gain, not mutual exchange"
+      }
+    ],
+    "canonical_seeds": [
+      "mutual",
+      "win-win",
+      "reciprocal",
+      "partnership",
+      "both sides"
+    ]
+  },
+  "SCARCITY_QUANTITY": {
+    "parent_appeal": "Pathos",
+    "parent_dimension": "Scarcity and Urgency",
+    "parent_subfeature": "exclusivity_quantity",
+    "function": "Markers of scarcity, exclusivity, and limited quantity that heighten perceived value (limited, exclusive, only, last few, while supplies last).",
+    "theory_anchor": "Scarcity heuristic (Cialdini); Worchel et al. (1975); reactance under restricted choice.",
+    "include": [
+      "Scarcity quantifiers (limited, scarce, rare, few, only, just X left)",
+      "Exclusivity markers (exclusive, members-only, by invitation, restricted)",
+      "Stock-depletion phrasal markers (while supplies last, last chance, final units)"
+    ],
+    "exclude": [
+      "Pure vague quantifiers (some, several) — belong to SPEC_VAGUE",
+      "Concrete numerical quantities without scarcity framing (three units)",
+      "Time-urgency markers (deadline, hurry) — belong to URGENCY_TIME"
+    ],
+    "common_drift_traps": [
+      {
+        "word": "hurry",
+        "drift_type": "TOPICAL_NEIGHBOR",
+        "why": "Time-urgency; belongs to URGENCY_TIME"
+      },
+      {
+        "word": "many",
+        "drift_type": "VALENCE_FLIP",
+        "why": "Abundance, not scarcity"
+      }
+    ],
+    "canonical_seeds": [
+      "limited",
+      "exclusive",
+      "only",
+      "rare",
+      "scarce"
+    ]
+  },
+  "URGENCY_TIME": {
+    "parent_appeal": "Pathos",
+    "parent_dimension": "Scarcity and Urgency",
+    "parent_subfeature": "temporal_urgency",
+    "function": "Time-urgency markers that compress decision time and intensify pressure (hurry, deadline, immediately, act now, expires).",
+    "theory_anchor": "Reactance and decision pressure under deadlines (Brehm 1966).",
+    "include": [
+      "Urgency directives (hurry, act now, don't wait, immediately, right away)",
+      "Deadline markers (deadline, expires, by [date], before it's too late)",
+      "Time-compression phrasal markers (running out, no time, last minute)"
+    ],
+    "exclude": [
+      "Quantity scarcity markers (limited, only) — belong to SCARCITY_QUANTITY",
+      "Generic temporal nearness (today, now) — belong to SPEC_PSYCH_NEAR unless functioning as urgency directive"
+    ],
+    "common_drift_traps": [
+      {
+        "word": "limited",
+        "drift_type": "TOPICAL_NEIGHBOR",
+        "why": "Quantity scarcity; belongs to SCARCITY_QUANTITY"
+      },
+      {
+        "word": "today",
+        "drift_type": "POS_DRIFT",
+        "why": "Temporal nearness; admit only when functioning as urgency directive"
+      }
+    ],
+    "canonical_seeds": [
+      "hurry",
+      "deadline",
+      "immediately",
+      "act now",
+      "expires"
+    ]
+  },
+  "PROP_LOADED": {
+    "parent_appeal": "Pathos",
+    "parent_dimension": "Propaganda Cues",
+    "parent_subfeature": "emotional_charge",
+    "function": "Emotionally loaded words with strong evaluative cast (positive or negative) used to bypass reasoning (corrupt, evil, glorious, heroic, traitor, patriot).",
+    "theory_anchor": "SemEval propaganda (Da San Martino 2019); loaded language as emotional-charge cue.",
+    "include": [
+      "Negative-loaded labels (corrupt, evil, disgusting, shameful, criminal, vile)",
+      "Positive-loaded labels (glorious, heroic, noble, sacred, virtuous, pure)",
+      "Ideologically charged epithets (traitor, patriot, martyr) when used as loaded labels"
+    ],
+    "exclude": [
+      "Person-targeted insult labels with name-calling function (idiot, fool, liar) — belong to PROP_NAMECALL",
+      "Combative action verbs (attack, destroy) — belong to FIGHTING",
+      "Generic positive/negative adjectives without high evaluative cast (good, bad, nice)"
+    ],
+    "common_drift_traps": [
+      {
+        "word": "idiot",
+        "drift_type": "TOPICAL_NEIGHBOR",
+        "why": "Name-calling label; belongs to PROP_NAMECALL"
+      },
+      {
+        "word": "attack",
+        "drift_type": "TOPICAL_NEIGHBOR",
+        "why": "Combative verb; belongs to FIGHTING"
+      },
+      {
+        "word": "good",
+        "drift_type": "HYPERNYM_DILUTION",
+        "why": "Generic, not strongly loaded"
+      }
+    ],
+    "canonical_seeds": [
+      "corrupt",
+      "evil",
+      "glorious",
+      "heroic",
+      "traitor",
+      "patriot"
+    ]
+  },
+  "PROP_NAMECALL": {
+    "parent_appeal": "Pathos",
+    "parent_dimension": "Propaganda Cues",
+    "parent_subfeature": "emotional_charge",
+    "function": "Person-targeted insult labels and slurs that demean an opponent without argument (idiot, fool, liar, terrorist, puppet).",
+    "theory_anchor": "Propaganda devices (Lee & Lee 1939); name-calling as ad hominem heuristic.",
+    "include": [
+      "Direct insult labels (idiot, fool, moron, imbecile, coward)",
+      "Truth-attacking labels (liar, fraud, fake, phony)",
+      "Political demonization labels (terrorist, puppet, dictator) when used as ad hominem"
+    ],
+    "exclude": [
+      "Loaded ideological epithets without person-target (evil, glorious) — belong to PROP_LOADED",
+      "Aggressive action verbs (attack, destroy) — belong to FIGHTING",
+      "Generic negative adjectives (bad, awful)"
+    ],
+    "common_drift_traps": [
+      {
+        "word": "evil",
+        "drift_type": "TOPICAL_NEIGHBOR",
+        "why": "Loaded epithet, not person-target name-call; belongs to PROP_LOADED"
+      },
+      {
+        "word": "attack",
+        "drift_type": "POS_DRIFT",
+        "why": "Verb, not person-label"
+      }
+    ],
+    "canonical_seeds": [
+      "idiot",
+      "liar",
+      "fool",
+      "puppet",
+      "terrorist"
+    ]
+  },
+  "PROP_FEAR": {
+    "parent_appeal": "Pathos",
+    "parent_dimension": "Propaganda Cues",
+    "parent_subfeature": "emotional_charge",
+    "function": "Fear-appeal markers that invoke threat to self, family, or group to compel compliance (terrifying, nightmare, doom, attack on our way of life).",
+    "theory_anchor": "Witte EPPM fear appeals; fear-arousal as compliance lever.",
+    "include": [
+      "Fear-emotion words (terrifying, frightening, horrifying, nightmare, dread)",
+      "Existential-threat phrasal markers (end of [X], doom, apocalypse, attack on our values)",
+      "Personal-threat markers (your family, your children, our way of life [in fear context])"
+    ],
+    "exclude": [
+      "Threat-severity adjectives without fear-arousal emotional content (deadly, catastrophic) — belong to IMPACT_THREAT",
+      "Loaded ideological labels (corrupt, evil) — belong to PROP_LOADED"
+    ],
+    "common_drift_traps": [
+      {
+        "word": "catastrophic",
+        "drift_type": "HYPERNYM_DILUTION",
+        "why": "Severity marker; belongs to IMPACT_THREAT"
+      }
+    ],
+    "canonical_seeds": [
+      "terrifying",
+      "nightmare",
+      "doom",
+      "frightening"
+    ]
+  },
+  "PROP_WHATABOUT": {
+    "parent_appeal": "Pathos",
+    "parent_dimension": "Propaganda Cues",
+    "parent_subfeature": "logical_distortion",
+    "function": "Whataboutism markers that deflect criticism by redirecting to opponent's faults (what about, but they too, you also did).",
+    "theory_anchor": "Propaganda devices; tu quoque fallacy as distortion.",
+    "include": [
+      "Whataboutism phrasal markers (what about, but what about, you yourself, you too)",
+      "Deflection openers (let's talk about your, why don't you mention)",
+      "Tu-quoque retort framings (the same applies to you, you do it as well)"
+    ],
+    "exclude": [
+      "Pure counter-arguments without deflection (however, on the contrary)",
+      "Doubt-sowing markers (allegedly, supposedly) — belong to PROP_DOUBT"
+    ],
+    "common_drift_traps": [
+      {
+        "word": "however",
+        "drift_type": "TOPICAL_NEIGHBOR",
+        "why": "Counter-argument, not whataboutism deflection"
+      }
+    ],
+    "canonical_seeds": [
+      "what about",
+      "you too",
+      "but what about"
+    ]
+  },
+  "PROP_DOUBT": {
+    "parent_appeal": "Pathos",
+    "parent_dimension": "Propaganda Cues",
+    "parent_subfeature": "logical_distortion",
+    "function": "Doubt-sowing markers that undermine credibility without direct refutation (alleged, so-called, questionable, supposedly, unreliable).",
+    "theory_anchor": "Propaganda devices; manufacturing uncertainty as distortion.",
+    "include": [
+      "Doubt-prefixing modifiers (alleged, so-called, supposed, purported)",
+      "Discrediting adjectives (questionable, unreliable, dubious, suspect)",
+      "Doubt-sowing adverbs (supposedly, ostensibly, allegedly when used to discredit)"
+    ],
+    "exclude": [
+      "Pure epistemic uncertainty without credibility-attack function (may, might) — belong to UNCERTAINTY",
+      "Hedges (kind of, around) — belong to HEDGES"
+    ],
+    "common_drift_traps": [
+      {
+        "word": "may",
+        "drift_type": "TOPICAL_NEIGHBOR",
+        "why": "Epistemic modal without credibility-attack; belongs to UNCERTAINTY"
+      },
+      {
+        "word": "kind of",
+        "drift_type": "TOPICAL_NEIGHBOR",
+        "why": "Hedge, not doubt-attack"
+      }
+    ],
+    "canonical_seeds": [
+      "alleged",
+      "so-called",
+      "questionable",
+      "supposedly",
+      "unreliable"
+    ]
+  },
+  "PROP_FLAG": {
+    "parent_appeal": "Pathos",
+    "parent_dimension": "Propaganda Cues",
+    "parent_subfeature": "heuristic_identity_appeals",
+    "function": "Flag-waving / nationalism markers appealing to in-group patriotic identity (patriot, our nation, motherland, fatherland, our values).",
+    "theory_anchor": "Propaganda devices (Lee & Lee 1939); nationalistic identity appeals (Shen 2025).",
+    "include": [
+      "Nationalism nouns (nation, motherland, fatherland, homeland, our country)",
+      "Patriotic identifiers (patriot, patriotic, our flag, our soldiers)",
+      "Group-identity values phrasal markers (our way of life, our values, our heritage)"
+    ],
+    "exclude": [
+      "Bandwagon markers (everyone, majority) — belong to PROP_BANDWAGON",
+      "Generic group reference without nationalist cast"
+    ],
+    "common_drift_traps": [
+      {
+        "word": "everyone",
+        "drift_type": "TOPICAL_NEIGHBOR",
+        "why": "Bandwagon; belongs to PROP_BANDWAGON"
+      }
+    ],
+    "canonical_seeds": [
+      "patriot",
+      "motherland",
+      "our nation",
+      "our values"
+    ]
+  },
+  "PROP_BANDWAGON": {
+    "parent_appeal": "Pathos",
+    "parent_dimension": "Propaganda Cues",
+    "parent_subfeature": "heuristic_identity_appeals",
+    "function": "Bandwagon markers appealing to majority adoption / consensus heuristic (everyone, majority of, most people, join us, don't be left out).",
+    "theory_anchor": "Propaganda devices; majority-influence heuristic.",
+    "include": [
+      "Universal quantifiers in bandwagon framing (everyone, all of us, the world)",
+      "Majority markers (majority, most people, everybody else, the masses)",
+      "Join-the-crowd phrasal markers (join us, don't be left behind, get on board)"
+    ],
+    "exclude": [
+      "Flag-waving identity markers (patriot, our nation) — belong to PROP_FLAG",
+      "Pure additive 'all' without bandwagon framing"
+    ],
+    "common_drift_traps": [
+      {
+        "word": "our nation",
+        "drift_type": "TOPICAL_NEIGHBOR",
+        "why": "Flag-waving; belongs to PROP_FLAG"
+      }
+    ],
+    "canonical_seeds": [
+      "everyone",
+      "majority",
+      "most people",
+      "join us"
+    ]
+  }
+}
