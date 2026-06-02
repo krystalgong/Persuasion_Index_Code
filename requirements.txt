@@ -1,0 +1,16 @@
+numpy>=1.24
+pandas>=2.0
+scipy>=1.10
+matplotlib>=3.7
+openpyxl>=3.1
+wordfreq>=3.0
+vaderSentiment>=3.3.2
+spacy>=3.7
+click>=8.0
+openai>=1.0
+pydantic>=2.0
+tqdm>=4.66
+jupyter>=1.0
+nbclient>=0.8
+nbformat>=5.9
+ipykernel>=6.25

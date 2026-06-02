@@ -35,6 +35,13 @@ BASE_DIR = Path(__file__).resolve().parent
 DEFAULT_HELPER_DIR = BASE_DIR / "helper_features"
 HELPER_DIR = Path(os.environ.get("PI_HELPER_DIR", str(DEFAULT_HELPER_DIR))).resolve()
 
+
+def _resolve_local_path(path: str | Path) -> Path:
+    local_path = Path(path).expanduser()
+    if local_path.is_absolute():
+        return local_path
+    return (BASE_DIR / local_path).resolve()
+
 # =========================================================
 # 0) HELPERS & GLOBALS
 # =========================================================
@@ -70,9 +77,9 @@ def _load_lexicons() -> Dict[str, Any]:
       - list -> set
       - dict[str, list] -> dict[str, set]
     """
-    filename = os.environ.get("PI_LEXICON_FILE", "helper_features/lexicons.json")
-    path = Path(filename)
-    print(f"Loading lexicons from: {filename}")
+    filename = os.environ.get("PI_LEXICON_FILE")
+    path = _resolve_local_path(filename) if filename else HELPER_DIR / "lexicons.json"
+    logger.info("Loading lexicons from: %s", path)
     with path.open("r", encoding="utf-8") as f:
         data = json.load(f)
 
@@ -382,10 +389,15 @@ def _load_concreteness_dic() -> Dict[str, float]:
         return {}
     
 @lru_cache(maxsize=1)
-def _load_mwe_concreteness_dic(path="helper_features/MultiwordExpression_Concreteness_Ratings.csv"):
+def _load_mwe_concreteness_dic(path: str | Path | None = None):
     mwe_dic = {}
+    mwe_path = (
+        _resolve_local_path(path)
+        if path is not None
+        else HELPER_DIR / "MultiwordExpression_Concreteness_Ratings.csv"
+    )
     try:
-        with open(path, "r", encoding="utf-8") as f:
+        with mwe_path.open("r", encoding="utf-8") as f:
             reader = csv.DictReader(f)
             for row in reader:
                 expr = row["Expression"].strip().lower()
@@ -400,19 +412,26 @@ def _load_mwe_concreteness_dic(path="helper_features/MultiwordExpression_Concret
 
     return mwe_dic
     
-# load NRC-VAD lexicons
 @lru_cache(maxsize=1)
-def _load_nrc_vad(path="helper_features/NRC-VAD-Lexicon-v2.1/Unigrams/unigrams-NRC-VAD-Lexicon-v2.1.txt"):
+def _load_nrc_vad(path: str | Path | None = None):
+    vad_path = (
+        _resolve_local_path(path)
+        if path is not None
+        else HELPER_DIR / "NRC-VAD-Lexicon-v2.1" / "Unigrams" / "unigrams-NRC-VAD-Lexicon-v2.1.txt"
+    )
     vad = {}
-    with open(path, "r", encoding="utf-8") as f:
-        reader = csv.DictReader(f, delimiter="\t")
-        for row in reader:
-            term = row["term"].lower()
-            vad[term] = (
-                float(row["valence"]),
-                float(row["arousal"]),
-                float(row["dominance"]),
-            )
+    try:
+        with vad_path.open("r", encoding="utf-8") as f:
+            reader = csv.DictReader(f, delimiter="\t")
+            for row in reader:
+                term = row["term"].lower()
+                vad[term] = (
+                    float(row["valence"]),
+                    float(row["arousal"]),
+                    float(row["dominance"]),
+                )
+    except Exception as e:
+        logger.warning("NRC-VAD lexicon unavailable. VAD features will be 0.0. Error: %s", e)
     return vad
 
 # =========================================================

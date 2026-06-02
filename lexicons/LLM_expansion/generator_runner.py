@@ -13,14 +13,13 @@ item to a JSONL file.
 
 Usage
 -----
-    export OPENAI_API_KEY=sk-...
-    export OPENAI_BASE_URL=https://us.api.openai.com/v1   # if you're on UMD enterprise
+    cp ../../.env.example ../../.env
+    # edit ../../.env and set OPENAI_API_KEY
 
     python generator_runner.py \\
         --theory theory_definitions.json \\
         --output gen_smoke.jsonl \\
         --only-categories "LOGIC_CAUSAL,IMPACT_GAIN" \\
-        --model gpt-5.4-mini-2026-03-17 \\
         --concurrency 6 --yes
 
 Resume
@@ -39,10 +38,15 @@ import time
 from pathlib import Path
 from typing import Dict, List, Literal, Optional, Tuple
 
+REPO_ROOT = Path(__file__).resolve().parents[2]
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
+
 from openai import AsyncOpenAI, APIError, RateLimitError, APITimeoutError, BadRequestError
-from pydantic import BaseModel, Field, ValidationError, field_validator
+from pydantic import BaseModel, ConfigDict, Field, ValidationError, field_validator
 from tqdm.asyncio import tqdm_asyncio
 
+from pi_config import DEFAULT_OPENAI_MODEL, get_openai_config, load_env_file
 from generation_prompts import (
     SLICE_SPECS,
     all_slice_names,
@@ -61,10 +65,11 @@ ConfidenceLiteral = Literal["high", "medium", "low"]
 
 class GeneratedItem(BaseModel):
     word: str = Field(min_length=1, max_length=80)
-    register: RegisterLiteral
+    item_register: RegisterLiteral = Field(alias="register")
     type: TypeLiteral
     confidence: ConfidenceLiteral
     rationale: str = Field(min_length=1, max_length=500)
+    model_config = ConfigDict(populate_by_name=True)
 
     @field_validator("word")
     @classmethod
@@ -207,7 +212,7 @@ async def generate_slice(
                         "category": category,
                         "slice": slice_name,
                         "word": item.word,
-                        "register": item.register,
+                        "register": item.item_register,
                         "type": item.type,
                         "confidence": item.confidence,
                         "rationale": item.rationale,
@@ -305,7 +310,9 @@ async def run(args: argparse.Namespace) -> None:
         if slice_key(c, s) not in done
     ]
 
-    print(f"[runner] base_url:          {os.environ.get('OPENAI_BASE_URL', '<default>')}")
+    cfg = get_openai_config()
+
+    print(f"[runner] base_url:          {cfg.base_url or '<default>'}")
     print(f"[runner] model:             {args.model}")
     print(f"[runner] token-param:       {'max_completion_tokens' if model_uses_new_token_param(args.model) else 'max_tokens'}")
     print(f"[runner] temperature:       {'(omitted; reasoning model)' if not model_supports_temperature(args.model) else '0.4'}")
@@ -321,7 +328,12 @@ async def run(args: argparse.Namespace) -> None:
         print("[runner] nothing to do.")
         return
 
-    client = AsyncOpenAI(api_key=os.environ.get("OPENAI_API_KEY"))
+    client = AsyncOpenAI(
+        api_key=cfg.api_key,
+        base_url=cfg.base_url,
+        organization=cfg.organization,
+        project=cfg.project,
+    )
 
     # Preflight: catch param mismatches BEFORE launching N tasks.
     if not args.skip_preflight:
@@ -380,9 +392,11 @@ def main() -> None:
     p = argparse.ArgumentParser(description="Theory-driven lexicon generation runner.")
     p.add_argument("--theory", default="theory_definitions.json")
     p.add_argument("--output", required=True, help="Output JSONL path (resumable)")
-    p.add_argument("--model", default="gpt-5.4-mini-2026-03-17",
-                   help="OpenAI model id; auto-detects max_tokens vs "
-                        "max_completion_tokens based on model name")
+    p.add_argument("--model", default=None,
+                   help=f"OpenAI model id. Defaults to OPENAI_MODEL from .env, "
+                        f"or {DEFAULT_OPENAI_MODEL!r}.")
+    p.add_argument("--config", default=None,
+                   help="Path to a .env-style config file. Defaults to repo-root .env.")
     p.add_argument("--concurrency", type=int, default=8)
     p.add_argument("--max-retries", type=int, default=4)
     p.add_argument("--flush-every", type=int, default=50)
@@ -397,8 +411,18 @@ def main() -> None:
                    help="Skip the cost-estimate confirmation prompt")
     args = p.parse_args()
 
-    if "OPENAI_API_KEY" not in os.environ:
-        print("ERROR: OPENAI_API_KEY env var not set.", file=sys.stderr)
+    config_path = load_env_file(args.config)
+    cfg = get_openai_config()
+    if args.model is None:
+        args.model = cfg.model
+
+    if not cfg.api_key:
+        print(
+            "ERROR: OPENAI_API_KEY is not set. Copy .env.example to .env, "
+            "add your key, or pass --config PATH.",
+            file=sys.stderr,
+        )
+        print(f"Looked for config at: {config_path}", file=sys.stderr)
         sys.exit(1)
 
     asyncio.run(run(args))

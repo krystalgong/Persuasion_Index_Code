@@ -1,0 +1,28 @@
+# Local environments
+.venv/
+venv/
+env/
+
+# Secrets and local config
+.env
+.env.*
+!.env.example
+
+# Python caches
+__pycache__/
+*.py[cod]
+*.pyo
+
+# Notebook and editor state
+.ipynb_checkpoints/
+.DS_Store
+
+# Generated LLM expansion artifacts
+lexicons/LLM_expansion/gen_*.jsonl
+lexicons/LLM_expansion/*_out/
+lexicons/LLM_expansion/full_out/
+lexicons/LLM_expansion/smoke_out/
+lexicons/lexicons_validation/half_samples/
+
+# Generated validation outputs
+lexicons/lexicons_validation/half_samples/*.pdf
