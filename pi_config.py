@@ -61,8 +61,14 @@ def load_env_file(
         if not key:
             continue
 
+        value = _strip_optional_quotes(value)
+        if not value.strip():
+            if override or not os.environ.get(key, "").strip():
+                os.environ.pop(key, None)
+            continue
+
         if override or key not in os.environ:
-            os.environ[key] = _strip_optional_quotes(value)
+            os.environ[key] = value
 
     return config_path
 

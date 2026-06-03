@@ -2,7 +2,7 @@
 Theory-driven lexicon generation runner (LLM-as-Lexicographer).
 
 Compatible with both GPT-4 family (gpt-4o-mini etc.) and GPT-5 family
-(gpt-5.4-mini, gpt-5.5 etc.). The runner auto-detects which token-limit
+(gpt-5.4-mini, gpt-5.4 etc.). The runner auto-detects which token-limit
 parameter the model expects:
     - GPT-5.x and reasoning models  -> max_completion_tokens
     - GPT-4.x and earlier           -> max_tokens
@@ -328,12 +328,14 @@ async def run(args: argparse.Namespace) -> None:
         print("[runner] nothing to do.")
         return
 
-    client = AsyncOpenAI(
-        api_key=cfg.api_key,
-        base_url=cfg.base_url,
-        organization=cfg.organization,
-        project=cfg.project,
-    )
+    client_kwargs = {"api_key": cfg.api_key}
+    if cfg.base_url:
+        client_kwargs["base_url"] = cfg.base_url
+    if cfg.organization:
+        client_kwargs["organization"] = cfg.organization
+    if cfg.project:
+        client_kwargs["project"] = cfg.project
+    client = AsyncOpenAI(**client_kwargs)
 
     # Preflight: catch param mismatches BEFORE launching N tasks.
     if not args.skip_preflight:
@@ -341,7 +343,25 @@ async def run(args: argparse.Namespace) -> None:
         err = await preflight(client, args.model)
         if err:
             print(f"[runner] PREFLIGHT FAILED: {err}", file=sys.stderr)
-            print(f"[runner] aborting — fix the model/endpoint and retry.", file=sys.stderr)
+            print("[runner] aborting — fix the API key, network, endpoint, or model and retry.", file=sys.stderr)
+            if "APIConnectionError" in err:
+                print(
+                    "[runner] connection hints: check internet/VPN/proxy/firewall; "
+                    "if your institution requires a custom endpoint, set OPENAI_BASE_URL in .env.",
+                    file=sys.stderr,
+                )
+            if "incorrect_hostname" in err or "us.api.openai.com" in err:
+                print(
+                    "[runner] regional endpoint hint: this key requires "
+                    "OPENAI_BASE_URL=https://us.api.openai.com/v1 in .env.",
+                    file=sys.stderr,
+                )
+            if "bad_request" in err or "NotFound" in err:
+                print(
+                    "[runner] model hints: use a valid model id such as gpt-5.4-mini, "
+                    "or set OPENAI_MODEL in .env.",
+                    file=sys.stderr,
+                )
             return
         print("[runner] preflight ok")
 

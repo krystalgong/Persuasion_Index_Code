@@ -35,8 +35,13 @@ OPENAI_MODEL=gpt-5.4-mini
 OPENAI_BASE_URL=
 ```
 
-`OPENAI_BASE_URL` is optional. Leave it blank unless your institution or proxy
-requires a custom endpoint.
+`OPENAI_BASE_URL` is optional. Leave it blank unless your institution/account
+requires a custom endpoint. If preflight says `incorrect regional hostname`,
+set:
+
+```text
+OPENAI_BASE_URL=https://us.api.openai.com/v1
+```
 
 The runner loads repo-root `.env` automatically. You can also pass a different
 file:
