@@ -20,7 +20,6 @@ python3 -m venv .venv
 source .venv/bin/activate
 python -m pip install --upgrade pip
 python -m pip install -r requirements.txt
-python -m ipykernel install --user --name persuasion-index --display-name "Persuasion Index"
 ```
 
 Optional, but recommended for named-entity features:
@@ -86,7 +85,9 @@ raw_scores, weighted_scores = get_persuasion_report("This plan is practical and 
 
 ## Notebooks
 
-Open the notebooks with the `Persuasion Index` kernel created during setup.
+Open the notebooks with the repo virtual environment interpreter:
+`.venv/bin/python`. In VS Code, use "Select Kernel" / "Python Environments"
+and choose the `.venv` in this repository.
 
 - `analysis_example.ipynb` demonstrates the public scoring API, seeded vs.
   expanded lexicons, DataFrame scoring, and weighted reports.
@@ -130,4 +131,3 @@ python apply_audit.py \
   --raw-lexicons ../../helper_features/lexicons.json \
   --out smoke_out/lexicons_expanded_LLM_audited.json
 ```
-
