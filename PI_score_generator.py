@@ -79,6 +79,16 @@ def _load_lexicons() -> Dict[str, Any]:
     """
     filename = os.environ.get("PI_LEXICON_FILE")
     path = _resolve_local_path(filename) if filename else HELPER_DIR / "lexicons.json"
+    if filename and not path.exists():
+        fallback = HELPER_DIR / Path(filename).name
+        if fallback.exists():
+            logger.warning(
+                "PI_LEXICON_FILE points to a missing file (%s). "
+                "Using bundled lexicon fallback: %s",
+                path,
+                fallback,
+            )
+            path = fallback
     logger.info("Loading lexicons from: %s", path)
     with path.open("r", encoding="utf-8") as f:
         data = json.load(f)
