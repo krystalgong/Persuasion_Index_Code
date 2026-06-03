@@ -17,7 +17,7 @@ from typing import Any, Literal
 
 import pandas as pd
 
-from PI_score_generator import HELPER_DIR, _PATTERN_CACHE, _load_lexicons, score_all
+from PI_score_generator import _PATTERN_CACHE, _load_lexicons, get_helper_dir, score_all
 
 LexiconChoice = Literal["expanded", "seeded"]
 OutputChoice = Literal["auto", "raw", "matrices", "both"]
@@ -50,10 +50,11 @@ def run_expanded_lexicons(
 
     Returns the lexicon path that was selected.
     """
+    helper_dir = get_helper_dir()
     filename = (
-        HELPER_DIR / "lexicons_expanded_LLM_audited.json"
+        helper_dir / "lexicons_expanded_LLM_audited.json"
         if use_expanded_lexicons
-        else HELPER_DIR / "lexicons.json"
+        else helper_dir / "lexicons.json"
     )
     os.environ["PI_LEXICON_FILE"] = str(filename)
     _load_lexicons.cache_clear()

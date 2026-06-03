@@ -3,7 +3,7 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
-from PI_score_generator import HELPER_DIR, score_all
+from PI_score_generator import get_helper_dir, score_all
 from persuasion_runner import run_expanded_lexicons
 
 
@@ -69,8 +69,9 @@ def get_persuasion_report(
     2. Empirical weighted scores using the UKP logistic-regression weights.
     """
     # 1. Paths to the empirical coefficient files
-    sub_path = HELPER_DIR / "regression_outputs" / "ci_ukp_subfeatures.csv"
-    mean_path = HELPER_DIR / "regression_outputs" / "ci_ukp_mean.csv"
+    helper_dir = get_helper_dir()
+    sub_path = helper_dir / "regression_outputs" / "ci_ukp_subfeatures.csv"
+    mean_path = helper_dir / "regression_outputs" / "ci_ukp_mean.csv"
 
     run_expanded_lexicons(use_expanded_lexicons)
     

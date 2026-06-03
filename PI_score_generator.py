@@ -33,14 +33,52 @@ logger = logging.getLogger("PI_score_generator")
 # -----------------------------------------------------------------------------
 BASE_DIR = Path(__file__).resolve().parent
 DEFAULT_HELPER_DIR = BASE_DIR / "helper_features"
-HELPER_DIR = Path(os.environ.get("PI_HELPER_DIR", str(DEFAULT_HELPER_DIR))).resolve()
 
 
-def _resolve_local_path(path: str | Path) -> Path:
+def _clean_env_value(name: str) -> str | None:
+    value = os.environ.get(name)
+    if value is None:
+        return None
+    value = value.strip()
+    return value or None
+
+
+def _resolve_local_path(path: str | Path, *, base: Path = BASE_DIR) -> Path:
     local_path = Path(path).expanduser()
     if local_path.is_absolute():
-        return local_path
-    return (BASE_DIR / local_path).resolve()
+        return local_path.resolve()
+    return (base / local_path).resolve()
+
+
+def get_helper_dir() -> Path:
+    """Return the helper feature directory in a cwd-independent way.
+
+    Empty `PI_HELPER_DIR` values are treated as unset. Relative overrides are
+    resolved from the repository root. If someone accidentally points
+    `PI_HELPER_DIR` at the repository root, use its `helper_features/` child.
+    """
+    raw_helper_dir = _clean_env_value("PI_HELPER_DIR")
+    if raw_helper_dir is None:
+        return DEFAULT_HELPER_DIR
+
+    helper_dir = _resolve_local_path(raw_helper_dir)
+    nested_helper_dir = helper_dir / "helper_features"
+    if nested_helper_dir.exists() and not (helper_dir / "lexicons.json").exists():
+        helper_dir = nested_helper_dir
+
+    if not helper_dir.exists() and DEFAULT_HELPER_DIR.exists():
+        logger.warning(
+            "PI_HELPER_DIR points to a missing directory (%s). "
+            "Using bundled helper_features directory: %s",
+            helper_dir,
+            DEFAULT_HELPER_DIR,
+        )
+        return DEFAULT_HELPER_DIR
+
+    return helper_dir
+
+
+HELPER_DIR = get_helper_dir()
 
 # =========================================================
 # 0) HELPERS & GLOBALS
@@ -77,10 +115,11 @@ def _load_lexicons() -> Dict[str, Any]:
       - list -> set
       - dict[str, list] -> dict[str, set]
     """
-    filename = os.environ.get("PI_LEXICON_FILE")
-    path = _resolve_local_path(filename) if filename else HELPER_DIR / "lexicons.json"
+    helper_dir = get_helper_dir()
+    filename = _clean_env_value("PI_LEXICON_FILE")
+    path = _resolve_local_path(filename) if filename else helper_dir / "lexicons.json"
     if filename and not path.exists():
-        fallback = HELPER_DIR / Path(filename).name
+        fallback = helper_dir / Path(filename).name
         if fallback.exists():
             logger.warning(
                 "PI_LEXICON_FILE points to a missing file (%s). "
@@ -266,7 +305,7 @@ RE_SOFT_ACK = re.compile(
 
 @lru_cache(maxsize=1)
 def _load_liwc_dic() -> Dict[str, list]:
-    path = HELPER_DIR / "en_liwc.txt"
+    path = get_helper_dir() / "en_liwc.txt"
     dic: Dict[str, list] = {}
     with path.open("r", encoding="utf-8", errors="ignore") as f:
         for line in f:
@@ -354,7 +393,7 @@ def _load_concreteness_dic() -> Dict[str, float]:
     Returns {} if missing/unreadable.
     Uses openpyxl read_only mode for low memory overhead.
     """
-    path = HELPER_DIR / "Brysbaert_concretness_dataset.xlsx"
+    path = get_helper_dir() / "Brysbaert_concretness_dataset.xlsx"
     if not path.exists():
         return {}
 
@@ -404,7 +443,7 @@ def _load_mwe_concreteness_dic(path: str | Path | None = None):
     mwe_path = (
         _resolve_local_path(path)
         if path is not None
-        else HELPER_DIR / "MultiwordExpression_Concreteness_Ratings.csv"
+        else get_helper_dir() / "MultiwordExpression_Concreteness_Ratings.csv"
     )
     try:
         with mwe_path.open("r", encoding="utf-8") as f:
@@ -427,7 +466,7 @@ def _load_nrc_vad(path: str | Path | None = None):
     vad_path = (
         _resolve_local_path(path)
         if path is not None
-        else HELPER_DIR / "NRC-VAD-Lexicon-v2.1" / "Unigrams" / "unigrams-NRC-VAD-Lexicon-v2.1.txt"
+        else get_helper_dir() / "NRC-VAD-Lexicon-v2.1" / "Unigrams" / "unigrams-NRC-VAD-Lexicon-v2.1.txt"
     )
     vad = {}
     try:

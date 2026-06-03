@@ -45,9 +45,13 @@ Important config values:
 - `OPENAI_API_KEY`: required for `lexicons/LLM_expansion/generator_runner.py`.
 - `OPENAI_BASE_URL`: optional custom API endpoint.
 - `OPENAI_MODEL`: default model for lexicon generation when `--model` is omitted.
-- `PI_HELPER_DIR`: optional override for the `helper_features/` directory.
-- `PI_LEXICON_FILE`: optional override for the lexicon JSON used by the scorer.
+- `PI_HELPER_DIR`: optional override for the `helper_features/` directory. Leave blank for normal repo use.
+- `PI_LEXICON_FILE`: optional override for the lexicon JSON used by the scorer. Leave blank for normal repo use.
 - `PI_DISABLE_SPACY=1`: disables spaCy loading if you do not need NER features.
+
+Blank `PI_HELPER_DIR` and `PI_LEXICON_FILE` values are treated as unset.
+Relative path overrides are resolved from the repository root, not from the
+notebook or terminal working directory.
 
 Do not commit `.env`.
 
@@ -126,5 +130,4 @@ python apply_audit.py \
   --raw-lexicons ../../helper_features/lexicons.json \
   --out smoke_out/lexicons_expanded_LLM_audited.json
 ```
-
 
