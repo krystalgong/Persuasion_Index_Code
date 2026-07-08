@@ -463,10 +463,18 @@ def _load_mwe_concreteness_dic(path: str | Path | None = None):
     
 @lru_cache(maxsize=1)
 def _load_nrc_vad(path: str | Path | None = None):
+    configured_path = _clean_env_value("PI_NRC_VAD_FILE")
     vad_path = (
         _resolve_local_path(path)
         if path is not None
-        else get_helper_dir() / "NRC-VAD-Lexicon-v2.1" / "Unigrams" / "unigrams-NRC-VAD-Lexicon-v2.1.txt"
+        else (
+            _resolve_local_path(configured_path)
+            if configured_path
+            else get_helper_dir()
+            / "NRC-VAD-Lexicon-v2.1"
+            / "Unigrams"
+            / "unigrams-NRC-VAD-Lexicon-v2.1.txt"
+        )
     )
     vad = {}
     try:

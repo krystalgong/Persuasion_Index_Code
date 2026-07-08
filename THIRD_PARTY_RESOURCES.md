@@ -21,7 +21,7 @@ The Persuasion Index scorer combines project-specific lexicons with external dat
 | Multiword-expression concreteness ratings | Phrase-level concreteness | Included under `helper_features/`; retain the original citation and provenance when redistributing. |
 | LIWC-style dictionary (`helper_features/en_liwc.txt`) | Pronouns, affect, tense, perception, and related categories | Used for English lexical categories. Confirm that the source terms permit redistribution before repackaging this resource elsewhere. |
 | ConvoKit politeness marker files | Politeness cues | Included under `helper_features/Convokit_Politeness/`; retain source attribution when redistributing. |
-| NRC-VAD Lexicon v2.1 | Valence, arousal, dominance sentiment subfeatures | Not bundled. Users should download it from the official NRC-VAD page into `helper_features/` for local non-commercial research/educational use. The official terms include a no-redistribution condition. The scorer can run without NRC-VAD, but VAD subfeatures will fall back to `0.0`. |
+| NRC-VAD Lexicon v2.1 | Valence, arousal, dominance sentiment subfeatures | Not bundled. Users should download it from the official NRC-VAD page for local non-commercial research/educational use. The official terms include a no-redistribution condition. Place it under `helper_features/` in a source checkout or set `PI_NRC_VAD_FILE` to its location. The scorer can run without NRC-VAD, but VAD subfeatures will fall back to `0.0`. |
 
 ## Resource handling
 

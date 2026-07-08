@@ -13,6 +13,11 @@ __pycache__/
 *.py[cod]
 *.pyo
 
+# Python package build artifacts
+build/
+dist/
+*.egg-info/
+
 # Notebook and editor state
 .ipynb_checkpoints/
 .DS_Store

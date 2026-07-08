@@ -1,0 +1,73 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "persuasion-index"
+version = "0.1.0"
+description = "Theory-guided, interpretable analysis of persuasive language"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "numpy>=1.24",
+    "pandas>=2.0",
+    "openpyxl>=3.1",
+    "wordfreq>=3.0",
+    "vaderSentiment>=3.3.2",
+    "spacy>=3.7",
+]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Science/Research",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Scientific/Engineering :: Information Analysis",
+    "Topic :: Text Processing :: Linguistic",
+]
+
+[project.optional-dependencies]
+lexicon = [
+    "openai>=1.0",
+    "pydantic>=2.0",
+    "tqdm>=4.66",
+]
+notebooks = [
+    "jupyter>=1.0",
+    "nbclient>=0.8",
+    "nbformat>=5.9",
+    "ipykernel>=6.25",
+    "matplotlib>=3.7",
+    "scipy>=1.10",
+]
+dev = [
+    "build>=1.2",
+    "pytest>=8.0",
+]
+
+[project.scripts]
+persuasion-index = "persuasion_index.cli:main"
+
+[tool.setuptools]
+packages = ["persuasion_index", "helper_features"]
+py-modules = [
+    "PI_score_generator",
+    "persuasion_runner",
+    "persuasion_profile",
+    "pi_config",
+]
+include-package-data = true
+
+[tool.setuptools.package-data]
+helper_features = [
+    "*.csv",
+    "*.json",
+    "*.txt",
+    "*.xlsx",
+    "Convokit_Politeness/*.json",
+    "regression_outputs/*.csv",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

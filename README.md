@@ -22,8 +22,10 @@ The taxonomy and its implementation are separate by design. The current scorer u
 
 ## Repository contents
 
+- `persuasion_index/`: installable package and stable public API.
+- `pyproject.toml`: package metadata, dependencies, and command-line entry point.
 - `PI_score_generator.py`: low-level scoring functions for one English argument.
-- `persuasion_runner.py`: simple public API for strings, lists, and DataFrames.
+- `persuasion_runner.py`: backward-compatible API for strings, lists, and DataFrames.
 - `persuasion_profile.py`: raw PI scores plus UKP-derived weighted profile scores.
 - `helper_features/lexicons.json`: original seed lexicons.
 - `helper_features/lexicons_expanded_LLM_audited.json`: audited expanded lexicons used by default.
@@ -39,11 +41,20 @@ This repository focuses on scoring, interpretation, and lexicon construction. Ev
 
 Use Python 3.10 or newer. Python 3.11 or 3.12 is recommended.
 
+Install the package from this repository:
+
 ```bash
 python3 -m venv .venv
 source .venv/bin/activate
 python -m pip install --upgrade pip
-python -m pip install -r requirements.txt
+python -m pip install .
+```
+
+For an editable research environment with the lexicon-expansion and notebook
+dependencies:
+
+```bash
+python -m pip install -e ".[lexicon,notebooks,dev]"
 ```
 
 Optional, but recommended for named-entity features:
@@ -65,9 +76,16 @@ unzip -q -o /tmp/NRC-VAD-Lexicon-v2.1.zip -d helper_features
 
 NRC-VAD is not bundled in this repository because the official terms permit non-commercial research/educational use but do not allow redistribution. The scorer expects the downloaded file at `helper_features/NRC-VAD-Lexicon-v2.1/Unigrams/unigrams-NRC-VAD-Lexicon-v2.1.txt`. If it is absent, the scorer still runs and sets the VAD subfeatures to `0.0`.
 
+When using an installed package rather than a source checkout, the file can
+live elsewhere:
+
+```bash
+export PI_NRC_VAD_FILE=/absolute/path/to/unigrams-NRC-VAD-Lexicon-v2.1.txt
+```
+
 ## Configuration
 
-API keys and local path overrides live in `.env`.
+The LLM expansion scripts load API settings from a repository-level `.env`:
 
 ```bash
 cp .env.example .env
@@ -82,9 +100,13 @@ Important config values:
 - `OPENAI_MODEL`: default model for lexicon generation when `--model` is omitted.
 - `PI_HELPER_DIR`: optional override for the `helper_features/` directory. Leave blank for normal repo use.
 - `PI_LEXICON_FILE`: optional override for the lexicon JSON used by the scorer. Leave blank for normal repo use.
+- `PI_NRC_VAD_FILE`: optional path to a separately downloaded NRC-VAD unigram file.
 - `PI_DISABLE_SPACY=1`: disables spaCy loading if you do not need NER features.
 
-Blank `PI_HELPER_DIR` and `PI_LEXICON_FILE` values are treated as unset. Relative path overrides are resolved from the repository root, not from the notebook or terminal working directory.
+The scoring library reads `PI_*` values from the process environment. The
+repository's LLM expansion runner also loads them from `.env`. Blank path
+values are treated as unset, and relative paths resolve from the installed
+module or repository root.
 
 Do not commit `.env`, API keys, local paths, notebook checkpoints, `__pycache__/`, or `.DS_Store`.
 
@@ -93,9 +115,9 @@ Do not commit `.env`, API keys, local paths, notebook checkpoints, `__pycache__/
 Score one argument:
 
 ```python
-from persuasion_runner import score_persuasion
+from persuasion_index import score
 
-scores = score_persuasion("According to recent studies, this policy will reduce costs.")
+scores = score("According to recent studies, this policy will reduce costs.")
 print(scores["Evidence"]["mean"])
 ```
 
@@ -103,23 +125,41 @@ Score a DataFrame:
 
 ```python
 import pandas as pd
-from persuasion_runner import score_persuasion
+from persuasion_index import score_batch
 
 df = pd.DataFrame({"argument": ["This is urgent.", "The evidence is mixed."]})
-subfeatures, means = score_persuasion(df, text_col="argument")
+subfeatures, dimensions = score_batch(df, text_col="argument")
 ```
 
 Generate the weighted profile report:
 
 ```python
-from persuasion_profile import get_persuasion_report
+from persuasion_index import get_report
 
-raw_scores, weighted_scores = get_persuasion_report(
+raw_scores, weighted_scores = get_report(
     "This plan is practical and evidence-based."
 )
 ```
 
 The raw output keeps all 55 subfeatures visible. Dimension scores are transparent, unweighted averages of their constituent subfeatures. The weighted report is a separate empirical profile based on stored UKP logistic-regression coefficients.
+
+The original imports from `persuasion_runner.py`, `persuasion_profile.py`, and
+`PI_score_generator.py` remain available for existing notebooks.
+
+## Command line
+
+Installation also provides a `persuasion-index` command:
+
+```bash
+persuasion-index "According to recent studies, this policy will reduce costs."
+```
+
+Use `--profile` to include the UKP-weighted empirical profile, or pipe text
+through standard input:
+
+```bash
+echo "This plan is urgent." | persuasion-index --profile
+```
 
 ## How scoring works
 
