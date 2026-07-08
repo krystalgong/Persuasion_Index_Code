@@ -15,6 +15,7 @@ dependencies = [
     "wordfreq>=3.0",
     "vaderSentiment>=3.3.2",
     "spacy>=3.7",
+    "click>=8.0",
 ]
 classifiers = [
     "Development Status :: 3 - Alpha",
@@ -50,7 +51,12 @@ dev = [
 persuasion-index = "persuasion_index.cli:main"
 
 [tool.setuptools]
-packages = ["persuasion_index", "helper_features"]
+packages = [
+    "persuasion_index",
+    "helper_features",
+    "helper_features.Convokit_Politeness",
+    "helper_features.regression_outputs",
+]
 py-modules = [
     "PI_score_generator",
     "persuasion_runner",
@@ -65,9 +71,9 @@ helper_features = [
     "*.json",
     "*.txt",
     "*.xlsx",
-    "Convokit_Politeness/*.json",
-    "regression_outputs/*.csv",
 ]
+"helper_features.Convokit_Politeness" = ["*.json"]
+"helper_features.regression_outputs" = ["*.csv"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
