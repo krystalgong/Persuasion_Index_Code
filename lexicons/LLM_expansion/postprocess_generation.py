@@ -132,7 +132,7 @@ def audit_priority(clean: pd.DataFrame) -> pd.DataFrame:
 
 
 # ---------------------------------------------------------------------------
-# Embedding overlap (paper-side comparison)
+# Optional embedding-overlap comparison
 # ---------------------------------------------------------------------------
 def overlap_with_embedding(
     clean: pd.DataFrame,
@@ -282,7 +282,7 @@ def main() -> None:
     audit_df["slices"] = audit_df["slices"].apply(lambda lst: "|".join(lst))
     audit_df["rationales"] = audit_df["rationales"].apply(lambda lst: " ||| ".join(lst))
     audit_df[audit_cols].to_csv(out / "audit_priority.csv", index=False)
-    print(f"[write] audit_priority.csv ({len(audit_df):,} rows; sort top-down for review)")
+    print(f"[write] audit_priority.csv ({len(audit_df):,} rows; highest audit priority first)")
 
     # Optional overlap with embedding CSV
     if args.embedding_csv:

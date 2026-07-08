@@ -1,6 +1,6 @@
-# Third-party resources and release notes
+# Third-party resources
 
-The Persuasion Index scorer uses several helper resources. Some are project-specific lexicons, and some come from external datasets or NLP tools. This file is meant to make the release easier to audit; it is not a legal opinion.
+The Persuasion Index scorer combines project-specific lexicons with external datasets and NLP tools. This page summarizes how those resources are used and which ones require separate installation.
 
 ## Project-specific resources
 
@@ -17,18 +17,15 @@ The Persuasion Index scorer uses several helper resources. Some are project-spec
 |---|---|---|
 | spaCy `en_core_web_sm` | English named-entity features | Installed by the user with `python -m spacy download en_core_web_sm`. |
 | VADER sentiment | Sentiment polarity | Installed through `vaderSentiment` in `requirements.txt`. |
-| Brysbaert concreteness ratings | Lexical concreteness | Keep citation/provenance with the manuscript and confirm redistribution rights before public archival. |
-| Multiword-expression concreteness ratings | Phrase-level concreteness | Keep citation/provenance with the manuscript and confirm redistribution rights before public archival. |
-| LIWC-style dictionary (`helper_features/en_liwc.txt`) | Pronouns, affect, tense, perception, and related categories | Verify that this file is redistributable. If it is derived from proprietary LIWC resources, replace it with a redistributable alternative before public release. |
-| ConvoKit politeness marker files | Politeness cues | Keep source attribution and confirm redistribution terms. |
+| Brysbaert concreteness ratings | Lexical concreteness | Included under `helper_features/`; retain the original citation and provenance when redistributing. |
+| Multiword-expression concreteness ratings | Phrase-level concreteness | Included under `helper_features/`; retain the original citation and provenance when redistributing. |
+| LIWC-style dictionary (`helper_features/en_liwc.txt`) | Pronouns, affect, tense, perception, and related categories | Used for English lexical categories. Confirm that the source terms permit redistribution before repackaging this resource elsewhere. |
+| ConvoKit politeness marker files | Politeness cues | Included under `helper_features/Convokit_Politeness/`; retain source attribution when redistributing. |
 | NRC-VAD Lexicon v2.1 | Valence, arousal, dominance sentiment subfeatures | Not bundled. Users should download it from the official NRC-VAD page into `helper_features/` for local non-commercial research/educational use. The official terms include a no-redistribution condition. The scorer can run without NRC-VAD, but VAD subfeatures will fall back to `0.0`. |
 
-## Recommended public-release handling
+## Resource handling
 
-For anonymous review, the repository should be clean of author-identifying information and secrets. For a later public archival release, the resource layer should be made stricter:
-
-- Keep project-created lexicons in the repository.
-- Replace non-redistributable third-party data with official download instructions and checksums.
-- Add a setup script that verifies expected external files under `helper_features/`.
-- Add citations for every external resource in the manuscript and in this file.
-- Do not apply a single repository license to third-party resources unless their licenses explicitly allow it.
+- Keep project-created lexicons with the scorer.
+- Obtain non-redistributable resources from their official sources.
+- Preserve source citations and license notices for all external resources.
+- Do not assume that a repository-level license overrides the terms of third-party files.

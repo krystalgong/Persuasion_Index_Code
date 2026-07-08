@@ -10,7 +10,7 @@ audit, and produces a flat lexicon JSON that can be used by the scorer.
 | File | Purpose |
 |---|---|
 | `theory_definitions.json` | Category-level theory definitions, inclusion rules, exclusions, drift traps, and canonical seeds. |
-| `generation_prompts.py` | Prompt builder for the nine generation slices per category. |
+| `generation_prompts.py` | Prompt builder for the seven generation slices per category. |
 | `generator_runner.py` | Async OpenAI generation runner with retries, resume support, and a one-call preflight. |
 | `postprocess_generation.py` | Deduplicates raw JSONL generations, splits hard negatives, writes audit files and summaries. |
 | `apply_audit.py` | Applies human audit decisions and writes the final flat deployment lexicon. |
@@ -81,7 +81,7 @@ python postprocess_generation.py \
 Expected output directory:
 
 - `smoke_out/lexicons.json`: rich lexicon entries with rationale/provenance.
-- `smoke_out/hard_negatives.json`: generated hard negatives.
+- `smoke_out/hard_negatives.json`: reserved output for any records explicitly flagged as hard negatives; empty under the default seven-slice configuration.
 - `smoke_out/audit_priority.csv`: audit spreadsheet, sorted by risk.
 - `smoke_out/category_sizes.csv`: per-category counts.
 - `smoke_out/summary.json`: global counts.
@@ -145,8 +145,8 @@ export PI_LEXICON_FILE=/absolute/path/to/full_out/lexicons_expanded_LLM_audited.
 
 ## Filtering and provenance
 
-The expansion workflow uses a conservative sequence so that reviewers can
-separate generation, automatic cleaning, and human audit:
+The expansion workflow uses a conservative sequence that keeps generation,
+automatic cleaning, and human audit traceable:
 
 1. `generator_runner.py` writes one JSONL record per generated item, including
    `category`, `slice`, `word`, `register`, `type`, `confidence`,
@@ -154,9 +154,10 @@ separate generation, automatic cleaning, and human audit:
 2. `postprocess_generation.py` normalizes whitespace and case, deduplicates by
    `(category, normalized word)`, and preserves all slice/register/rationale
    provenance for each merged item.
-3. Items produced only by hard-negative slices are separated into
-   `hard_negatives.json`; if an item appears in both positive and hard-negative
-   slices, it is marked as contested and sent to audit.
+3. The post-processor can separate records flagged as hard negatives into
+   `hard_negatives.json`. The paper-aligned default configuration uses seven
+   positive register- and morphology-conditioned slices, so this file is empty
+   unless the input contains separately flagged records.
 4. `audit_priority.csv` sorts the riskiest items first. The current risk score
    increases for low model confidence, single-slice evidence, and contested
    items.

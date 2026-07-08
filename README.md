@@ -1,12 +1,26 @@
-# Persuasion Index Code
+# Persuasion Index
 
-Anonymous code release for **Persuasion Index: An Interpretable Framework for Quantifying Persuasiveness Across Domains**.
+Code and resources for **Persuasion Index: A Theory-Guided Framework for Persuasion Analysis**.
 
-This repository is the code-facing release of the project. It is meant to let reviewers run the Persuasion Index scorer, inspect the lexicons, execute the example notebooks, and reproduce the LLM-assisted lexicon expansion workflow. The interactive anonymous GUI is available here:
+The Persuasion Index (PI) represents persuasive language through 15 theory-grounded rhetorical dimensions and 55 transparent lexicon- and rule-based subfeatures. It is designed for interpretable analysis of rhetorical cues in human- and AI-generated text.
+
+Try the interactive web interface:
 
 https://anonymous.4open.science/w/pi-1DE2/
 
-## What is included
+## Framework at a glance
+
+The 15 dimensions are organized under the Aristotelian triad:
+
+| Appeal | Dimensions |
+|---|---|
+| **Logos** | Evidence, Logic/Cohesion, Argumentation, Specificity, Opponent's View |
+| **Ethos** | Authority/Credibility, Politeness, Commitment, Style |
+| **Pathos** | Sentiment, Impact, Engagement, Reciprocity, Scarcity/Urgency, Propaganda |
+
+The taxonomy and its implementation are separate by design. The current scorer uses interpretable lexical and structural cues, while individual detectors can be replaced or extended without changing the 15-dimension framework.
+
+## Repository contents
 
 - `PI_score_generator.py`: low-level scoring functions for one English argument.
 - `persuasion_runner.py`: simple public API for strings, lists, and DataFrames.
@@ -19,15 +33,11 @@ https://anonymous.4open.science/w/pi-1DE2/
 - `lexicons/LLM_expansion/`: LLM-assisted lexicon expansion pipeline.
 - `THIRD_PARTY_RESOURCES.md`: helper-resource provenance, citation, and license notes.
 
-The implementation currently targets English argumentative text. The English-only scope matters because the scorer relies on English tokenization, English lexicons, VADER, spaCy `en_core_web_sm`, LIWC-style categories, concreteness resources, and optional NRC-VAD-style affective ratings.
-
-## What is not included
-
-This release is intentionally smaller than the full research workspace. The public comparison repository used during development contains raw train/test CSVs, precomputed feature vectors, figures, and full analysis notebooks. This anonymous code release does not bundle those large experiment artifacts by default, mainly to keep the reviewer package focused on executable scoring code and to avoid redistributing datasets or external resources without checking each source license.
+This repository focuses on scoring, interpretation, and lexicon construction. Evaluation corpora and other large experiment artifacts are not bundled. The paper reports evaluation on four public datasets: UKPConvArg1, ChangeMyView, IBM Argument Quality, and Anthropic Persuasion.
 
 ## Setup
 
-Use Python 3.10 or newer. Python 3.11/3.12 is the safest choice for academic reproducibility.
+Use Python 3.10 or newer. Python 3.11 or 3.12 is recommended.
 
 ```bash
 python3 -m venv .venv
@@ -109,17 +119,32 @@ raw_scores, weighted_scores = get_persuasion_report(
 )
 ```
 
-The raw output keeps all subfeatures visible. Category means are transparent unweighted averages of the current subfeatures. The weighted report is a separate empirical profile based on stored UKP logistic-regression coefficients.
+The raw output keeps all 55 subfeatures visible. Dimension scores are transparent, unweighted averages of their constituent subfeatures. The weighted report is a separate empirical profile based on stored UKP logistic-regression coefficients.
 
-## Interpreting the scores
+## How scoring works
 
-PI features are interpretable textual indicators, not black-box persuasion predictions. A few definitions are important for review:
+Each subfeature is mapped to `[0, 1]`. Most lexical cues use a saturating density transform,
+
+```text
+score = 1 - exp(-0.5 * r)
+```
+
+where `r` is the match rate per 100 tokens. Sparse cues are represented as binary presence/absence indicators. When lexicon matches overlap, the scorer retains the longest non-contained span. Each of the 15 dimension scores is the unweighted mean of its subfeatures.
+
+PI scores describe cues present in a message. They should not be interpreted as a universal probability that the message will persuade a particular audience:
 
 - **Evidence** features detect evidence-like signals such as statistics, attribution phrases, and named entities. They do not perform external fact-checking or verify whether a claim is true.
 - **Logic/Cohesion** features detect explicit structural and discourse markers. They do not prove that an argument is formally valid.
-- **Sentiment** combines VADER, affective lexicons, and LIWC-style affect categories where available.
-- **Category means** are baseline summaries, not the final theoretical claim about how each subfeature should be weighted.
-- **Weighted profile scores** in `persuasion_profile.py` use stored UKP coefficients and should be read as an empirical UKP-oriented profile, not a universal persuasion score.
+- **Sentiment** combines VADER affective intensity, affective lexicons, LIWC-style categories, and optional NRC-VAD ratings.
+- **Weighted profile scores** in `persuasion_profile.py` use stored UKP coefficients. They are an empirical UKP-oriented output, not a context-free persuasion score.
+
+## Scope and limitations
+
+The current implementation targets English argumentative text. Its lexicons, tokenization, concreteness resources, VADER model, LIWC-style categories, and optional NRC-VAD ratings are English-specific.
+
+PI analyzes rhetorical choices encoded in a message. It does not observe audience attitudes, source reputation, relationship history, or the surrounding social context, all of which can affect persuasive outcomes. Surface-level detectors also have limited coverage of implicit framing, irony, sarcasm, long-range narrative structure, and cross-sentence argumentation.
+
+Associations between PI dimensions and persuasive outcomes vary across datasets, topics, and stances. Before using PI in a new applied setting, examine local score distributions and check for systematic disparities across relevant groups. PI is intended for analysis and auditing of persuasive language, not for generating manipulative content.
 
 ## Notebooks
 
@@ -137,7 +162,7 @@ python -m nbconvert --to notebook --execute lexicons/lexicons_validation/lexicon
 
 ## LLM lexicon expansion
 
-The expansion pipeline lives in `lexicons/LLM_expansion/` and is documented in `lexicons/LLM_expansion/README.md`.
+The expansion pipeline lives in `lexicons/LLM_expansion/` and is documented in `lexicons/LLM_expansion/README.md`. It follows the seven register- and morphology-conditioned slices described in the paper.
 
 Minimal smoke run after configuring `.env`:
 
@@ -163,14 +188,4 @@ python apply_audit.py \
   --out smoke_out/lexicons_expanded_LLM_audited.json
 ```
 
-The default deployment lexicon in this repo is `helper_features/lexicons_expanded_LLM_audited.json`.
-
-## Reviewer checklist
-
-Before sharing the anonymous link, check:
-
-- The GUI link works: https://anonymous.4open.science/w/pi-1DE2/
-- `.env` is not present in version control.
-- No API keys, local absolute paths, author names, or affiliation strings are committed.
-- No `__pycache__/`, `.pyc`, `.DS_Store`, or notebook checkpoints are committed.
-- Third-party helper resources are cited and license-sensitive resources are handled as described in `THIRD_PARTY_RESOURCES.md`.
+The default deployment lexicon in this repository is `helper_features/lexicons_expanded_LLM_audited.json`.

@@ -2,9 +2,9 @@
 Prompt builder for theory-driven lexicon GENERATION (LLM-as-Lexicographer).
 
 Design: rather than asking the LLM to enumerate a category in one shot
-(which produces shallow, duplicative output), we run 9 sliced prompts per
+(which produces shallow, duplicative output), we run 7 sliced prompts per
 category and union the results. Each slice asks for a specific
-register / morphological / boundary subset.
+register or morphological subset.
 
 Slices
 ------
@@ -15,17 +15,6 @@ Slices
     domain_specific      Domain-anchored items (legal, academic, political...)
     archaic_literary     Archaic / literary register
     inflectional         Morphological variants of canonical seeds
-    negation_partner     Explicit antonyms / refutational counterparts
-                         (HARD NEGATIVES — flagged is_hard_negative=true,
-                          NEVER admitted into the final lexicon)
-    boundary_test        Near-miss candidates that test the EXCLUDE rules
-                         (HARD NEGATIVES — flagged is_hard_negative=true,
-                          NEVER admitted into the final lexicon)
-
-The last two slices intentionally generate items NOT to be admitted.
-They populate a same-source hard-negatives pool used for paper-side
-ablation analysis without requiring the legacy embedding CSV.
-
 Output schema (per item)
 ------------------------
     {
@@ -36,9 +25,9 @@ Output schema (per item)
       "rationale": <str>
     }
 
-Hard-negative slices (negation_partner, boundary_test) write
-type="antonym" or type="boundary" so the runner can mark them as
-is_hard_negative=true downstream.
+The prompt builder and post-processing schema retain an `is_hard_negative`
+field for compatibility with separately flagged inputs, although the default
+seven-slice configuration uses only positive generation slices.
 """
 from typing import Dict, List, Tuple
 

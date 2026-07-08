@@ -30,8 +30,7 @@ lexicons/lexicons_validation/half_samples/*.pdf
 # External data users download locally because redistribution is not allowed.
 helper_features/NRC-VAD-Lexicon-v2.1/
 
-# Full-study artifacts that should not be copied into the anonymous code repo
-# unless their dataset/resource licenses have been checked.
+# Large study artifacts and licensed datasets are kept outside this code repository.
 train_test_files/
 feature_vectors/
 fig/
