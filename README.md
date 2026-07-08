@@ -1,19 +1,33 @@
 # Persuasion Index Code
 
-Code and lexicon resources for computing Persuasion Index features from
-argumentative text. The repository includes:
+Anonymous code release for **Persuasion Index: An Interpretable Framework for Quantifying Persuasiveness Across Domains**.
 
-- `PI_score_generator.py`: low-level feature scoring for one text.
+This repository is the code-facing release of the project. It is meant to let reviewers run the Persuasion Index scorer, inspect the lexicons, execute the example notebooks, and reproduce the LLM-assisted lexicon expansion workflow. The interactive anonymous GUI is available here:
+
+https://anonymous.4open.science/w/pi-1DE2/
+
+## What is included
+
+- `PI_score_generator.py`: low-level scoring functions for one English argument.
 - `persuasion_runner.py`: simple public API for strings, lists, and DataFrames.
-- `persuasion_profile.py`: raw scores plus UKP-derived weighted persuasion reports.
-- `analysis_example.ipynb`: compact usage notebook for the scoring API.
-- `lexicons/lexicons_validation/lexicon_code_validation.ipynb`: validation notebook for lexicon split-half checks.
+- `persuasion_profile.py`: raw PI scores plus UKP-derived weighted profile scores.
+- `helper_features/lexicons.json`: original seed lexicons.
+- `helper_features/lexicons_expanded_LLM_audited.json`: audited expanded lexicons used by default.
+- `helper_features/regression_outputs/`: stored UKP coefficient files used by `get_persuasion_report`.
+- `analysis_example.ipynb`: compact usage notebook for the public scoring API.
+- `lexicons/lexicons_validation/lexicon_code_validation.ipynb`: validation notebook for scoring behavior and split-half lexicon checks.
 - `lexicons/LLM_expansion/`: LLM-assisted lexicon expansion pipeline.
+- `THIRD_PARTY_RESOURCES.md`: helper-resource provenance, citation, and license notes.
+
+The implementation currently targets English argumentative text. The English-only scope matters because the scorer relies on English tokenization, English lexicons, VADER, spaCy `en_core_web_sm`, LIWC-style categories, concreteness resources, and optional NRC-VAD-style affective ratings.
+
+## What is not included
+
+This release is intentionally smaller than the full research workspace. The public comparison repository used during development contains raw train/test CSVs, precomputed feature vectors, figures, and full analysis notebooks. This anonymous code release does not bundle those large experiment artifacts by default, mainly to keep the reviewer package focused on executable scoring code and to avoid redistributing datasets or external resources without checking each source license.
 
 ## Setup
 
-Use Python 3.10 or newer. Python 3.11/3.12 is a conservative choice for
-academic reproducibility.
+Use Python 3.10 or newer. Python 3.11/3.12 is the safest choice for academic reproducibility.
 
 ```bash
 python3 -m venv .venv
@@ -28,6 +42,19 @@ Optional, but recommended for named-entity features:
 python -m spacy download en_core_web_sm
 ```
 
+The scorer still runs without the spaCy model, but NER-dependent features will be reduced.
+
+Optional NRC-VAD setup for valence/arousal/dominance sentiment features:
+
+```bash
+mkdir -p helper_features
+curl -L "https://saifmohammad.com/WebDocs/Lexicons/NRC-VAD-Lexicon-v2.1.zip" \
+  -o /tmp/NRC-VAD-Lexicon-v2.1.zip
+unzip -q -o /tmp/NRC-VAD-Lexicon-v2.1.zip -d helper_features
+```
+
+NRC-VAD is not bundled in this repository because the official terms permit non-commercial research/educational use but do not allow redistribution. The scorer expects the downloaded file at `helper_features/NRC-VAD-Lexicon-v2.1/Unigrams/unigrams-NRC-VAD-Lexicon-v2.1.txt`. If it is absent, the scorer still runs and sets the VAD subfeatures to `0.0`.
+
 ## Configuration
 
 API keys and local path overrides live in `.env`.
@@ -36,25 +63,22 @@ API keys and local path overrides live in `.env`.
 cp .env.example .env
 ```
 
-Edit `.env` and set `OPENAI_API_KEY` before running the LLM expansion
-pipeline. The scoring notebooks do not require an API key.
+Edit `.env` and set `OPENAI_API_KEY` only if you plan to run the LLM expansion pipeline. The scoring API and notebooks do not require an API key.
 
 Important config values:
 
-- `OPENAI_API_KEY`: required for `lexicons/LLM_expansion/generator_runner.py`.
+- `OPENAI_API_KEY`: required only for `lexicons/LLM_expansion/generator_runner.py`.
 - `OPENAI_BASE_URL`: optional custom API endpoint.
 - `OPENAI_MODEL`: default model for lexicon generation when `--model` is omitted.
 - `PI_HELPER_DIR`: optional override for the `helper_features/` directory. Leave blank for normal repo use.
 - `PI_LEXICON_FILE`: optional override for the lexicon JSON used by the scorer. Leave blank for normal repo use.
 - `PI_DISABLE_SPACY=1`: disables spaCy loading if you do not need NER features.
 
-Blank `PI_HELPER_DIR` and `PI_LEXICON_FILE` values are treated as unset.
-Relative path overrides are resolved from the repository root, not from the
-notebook or terminal working directory.
+Blank `PI_HELPER_DIR` and `PI_LEXICON_FILE` values are treated as unset. Relative path overrides are resolved from the repository root, not from the notebook or terminal working directory.
 
-Do not commit `.env`.
+Do not commit `.env`, API keys, local paths, notebook checkpoints, `__pycache__/`, or `.DS_Store`.
 
-## Quick Usage
+## Quick usage
 
 Score one argument:
 
@@ -80,21 +104,29 @@ Generate the weighted profile report:
 ```python
 from persuasion_profile import get_persuasion_report
 
-raw_scores, weighted_scores = get_persuasion_report("This plan is practical and evidence-based.")
+raw_scores, weighted_scores = get_persuasion_report(
+    "This plan is practical and evidence-based."
+)
 ```
+
+The raw output keeps all subfeatures visible. Category means are transparent unweighted averages of the current subfeatures. The weighted report is a separate empirical profile based on stored UKP logistic-regression coefficients.
+
+## Interpreting the scores
+
+PI features are interpretable textual indicators, not black-box persuasion predictions. A few definitions are important for review:
+
+- **Evidence** features detect evidence-like signals such as statistics, attribution phrases, and named entities. They do not perform external fact-checking or verify whether a claim is true.
+- **Logic/Cohesion** features detect explicit structural and discourse markers. They do not prove that an argument is formally valid.
+- **Sentiment** combines VADER, affective lexicons, and LIWC-style affect categories where available.
+- **Category means** are baseline summaries, not the final theoretical claim about how each subfeature should be weighted.
+- **Weighted profile scores** in `persuasion_profile.py` use stored UKP coefficients and should be read as an empirical UKP-oriented profile, not a universal persuasion score.
 
 ## Notebooks
 
-Open the notebooks with the repo virtual environment interpreter:
-`.venv/bin/python`. In VS Code, use "Select Kernel" / "Python Environments"
-and choose the `.venv` in this repository.
+Open the notebooks with the repo virtual environment interpreter: `.venv/bin/python`. In VS Code, use "Select Kernel" / "Python Environments" and choose the `.venv` in this repository.
 
-- `analysis_example.ipynb` demonstrates the public scoring API, seeded vs.
-  expanded lexicons, DataFrame scoring, and weighted reports.
-- `lexicons/lexicons_validation/lexicon_code_validation.ipynb` validates
-  scoring behavior and runs split-half lexicon checks. If the UKP train/test
-  CSVs are not present, it falls back to a small built-in validation corpus so
-  the notebook still executes.
+- `analysis_example.ipynb` demonstrates the public scoring API, seeded vs. expanded lexicons, DataFrame scoring, and weighted reports.
+- `lexicons/lexicons_validation/lexicon_code_validation.ipynb` validates scoring behavior and runs split-half lexicon checks. If the UKP train/test CSVs are not present, it falls back to a small built-in validation corpus so the notebook still executes.
 
 To execute from the command line:
 
@@ -103,10 +135,9 @@ python -m nbconvert --to notebook --execute analysis_example.ipynb --output /tmp
 python -m nbconvert --to notebook --execute lexicons/lexicons_validation/lexicon_code_validation.ipynb --output /tmp/lexicon_code_validation.executed.ipynb
 ```
 
-## LLM Lexicon Expansion
+## LLM lexicon expansion
 
-The expansion pipeline lives in `lexicons/LLM_expansion/` and is documented in
-[lexicons/LLM_expansion/README.md](lexicons/LLM_expansion/README.md).
+The expansion pipeline lives in `lexicons/LLM_expansion/` and is documented in `lexicons/LLM_expansion/README.md`.
 
 Minimal smoke run after configuring `.env`:
 
@@ -131,3 +162,15 @@ python apply_audit.py \
   --raw-lexicons ../../helper_features/lexicons.json \
   --out smoke_out/lexicons_expanded_LLM_audited.json
 ```
+
+The default deployment lexicon in this repo is `helper_features/lexicons_expanded_LLM_audited.json`.
+
+## Reviewer checklist
+
+Before sharing the anonymous link, check:
+
+- The GUI link works: https://anonymous.4open.science/w/pi-1DE2/
+- `.env` is not present in version control.
+- No API keys, local absolute paths, author names, or affiliation strings are committed.
+- No `__pycache__/`, `.pyc`, `.DS_Store`, or notebook checkpoints are committed.
+- Third-party helper resources are cited and license-sensitive resources are handled as described in `THIRD_PARTY_RESOURCES.md`.

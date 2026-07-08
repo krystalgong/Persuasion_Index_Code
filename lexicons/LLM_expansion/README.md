@@ -30,7 +30,8 @@ cp .env.example .env
 Edit `.env`:
 
 ```text
-OPENAI_API_KEY=sk-...
+OPENAI_API_KEY=
+# Fill this locally only. Do not commit real keys.
 OPENAI_MODEL=gpt-5.4-mini
 OPENAI_BASE_URL=
 ```
@@ -141,6 +142,35 @@ To use the new audited lexicon in the main scorer, either copy it into
 ```bash
 export PI_LEXICON_FILE=/absolute/path/to/full_out/lexicons_expanded_LLM_audited.json
 ```
+
+## Filtering and provenance
+
+The expansion workflow uses a conservative sequence so that reviewers can
+separate generation, automatic cleaning, and human audit:
+
+1. `generator_runner.py` writes one JSONL record per generated item, including
+   `category`, `slice`, `word`, `register`, `type`, `confidence`,
+   `rationale`, `is_hard_negative`, and `model`.
+2. `postprocess_generation.py` normalizes whitespace and case, deduplicates by
+   `(category, normalized word)`, and preserves all slice/register/rationale
+   provenance for each merged item.
+3. Items produced only by hard-negative slices are separated into
+   `hard_negatives.json`; if an item appears in both positive and hard-negative
+   slices, it is marked as contested and sent to audit.
+4. `audit_priority.csv` sorts the riskiest items first. The current risk score
+   increases for low model confidence, single-slice evidence, and contested
+   items.
+5. Optional embedding overlap is only a comparison diagnostic. The default
+   `--embedding-sim-threshold` is `0.7`, and it is used for the overlap report,
+   not as an automatic admission rule for the final lexicon.
+6. `apply_audit.py` removes items marked with `audit_decision=2`; blank or `1`
+   means keep.
+
+The deployed file `helper_features/lexicons_expanded_LLM_audited.json` is the
+flat scorer-ready lexicon. For a future full reproduction release, keep the raw
+JSONL, post-processing outputs, final audit spreadsheet, model ID, generation
+date, prompt version, and any available API metadata together with the final
+flat lexicon.
 
 ## Notes
 
