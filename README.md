@@ -57,31 +57,74 @@ dependencies:
 python -m pip install -e ".[lexicon,notebooks,dev]"
 ```
 
-Optional, but recommended for named-entity features:
+## Optional external resources
+
+This repository and its wheel do not redistribute third-party dictionaries or
+rating datasets unless redistribution permission is clear. The scorer still
+returns the same 15 dimensions and 55 subfeatures without them, but some values
+will be partial or will use documented fallback values.
+
+Install the spaCy English model for named-entity features:
 
 ```bash
 python -m spacy download en_core_web_sm
 ```
 
-The scorer still runs without the spaCy model, but NER-dependent features will be reduced.
+Without this model, NER-dependent parts of `Evidence.named_entities` and
+`Authority/Credibility.organizations` are unavailable.
 
-Optional NRC-VAD setup for valence/arousal/dominance sentiment features:
+For LIWC-derived cues, obtain a dictionary through the
+[official LIWC site](https://www.liwc.app/download) under an appropriate
+license, then point the scorer to the local `.dic` file:
 
 ```bash
-mkdir -p helper_features
+export PI_LIWC_FILE=/absolute/path/to/LIWC.dic
+```
+
+The loader supports standard LIWC `.dic` files and the compact
+`Category: term1 term2 ...` format. The implementation uses the categories
+`Ppron`, `I`, `You`, `Past`, `See`, `Anger`, `Sad`, `Anx`, and `Posemo`.
+Without a compatible file, the LIWC-derived portions of several Sentiment,
+Engagement, and Specificity subfeatures are unavailable.
+
+For single-word concreteness, obtain the Brysbaert, Warriner, and Kuperman
+ratings from the [Ghent University record](https://biblio.ugent.be/publication/5774089)
+or its official data source. The loader accepts `.xlsx`, tab-delimited
+`.txt`/`.tsv`, or `.csv` files containing `Word` and `Conc.M` columns:
+
+```bash
+export PI_CONCRETENESS_FILE=/absolute/path/to/concreteness_ratings.txt
+```
+
+For multiword concreteness, download the processed summary file from the
+[authors' OSF project](https://osf.io/ksypa/) and provide the CSV containing
+`Expression` and `Mean_C` columns:
+
+```bash
+export PI_MWE_CONCRETENESS_FILE=/absolute/path/to/mwe_concreteness.csv
+```
+
+If neither concreteness resource is available,
+`Specificity.lexical_concreteness` uses the neutral fallback value `0.5`.
+When only one is available, the score is computed from that resource alone.
+
+For NRC-VAD, download the lexicon under its official terms and keep it outside
+version control:
+
+```bash
+mkdir -p local_resources
 curl -L "https://saifmohammad.com/WebDocs/Lexicons/NRC-VAD-Lexicon-v2.1.zip" \
-  -o /tmp/NRC-VAD-Lexicon-v2.1.zip
-unzip -q -o /tmp/NRC-VAD-Lexicon-v2.1.zip -d helper_features
+  -o local_resources/NRC-VAD-Lexicon-v2.1.zip
+unzip -q -o local_resources/NRC-VAD-Lexicon-v2.1.zip -d local_resources
+export PI_NRC_VAD_FILE="$PWD/local_resources/NRC-VAD-Lexicon-v2.1/Unigrams/unigrams-NRC-VAD-Lexicon-v2.1.txt"
 ```
 
-NRC-VAD is not bundled in this repository because the official terms permit non-commercial research/educational use but do not allow redistribution. The scorer expects the downloaded file at `helper_features/NRC-VAD-Lexicon-v2.1/Unigrams/unigrams-NRC-VAD-Lexicon-v2.1.txt`. If it is absent, the scorer still runs and sets the VAD subfeatures to `0.0`.
+Without NRC-VAD, `Sentiment.valence`, `Sentiment.arousal`, and
+`Sentiment.dominance` are set to `0.0`.
 
-When using an installed package rather than a source checkout, the file can
-live elsewhere:
-
-```bash
-export PI_NRC_VAD_FILE=/absolute/path/to/unigrams-NRC-VAD-Lexicon-v2.1.txt
-```
+These fallbacks keep the API and vector dimensions stable. They are intended
+for graceful execution, not as a claim of complete feature reproduction.
+See `THIRD_PARTY_RESOURCES.md` for the full resource table.
 
 ## Configuration
 
@@ -100,6 +143,9 @@ Important config values:
 - `OPENAI_MODEL`: default model for lexicon generation when `--model` is omitted.
 - `PI_HELPER_DIR`: optional override for the `helper_features/` directory. Leave blank for normal repo use.
 - `PI_LEXICON_FILE`: optional override for the lexicon JSON used by the scorer. Leave blank for normal repo use.
+- `PI_LIWC_FILE`: path to a locally licensed LIWC-compatible dictionary.
+- `PI_CONCRETENESS_FILE`: path to single-word concreteness ratings.
+- `PI_MWE_CONCRETENESS_FILE`: path to multiword-expression concreteness ratings.
 - `PI_NRC_VAD_FILE`: optional path to a separately downloaded NRC-VAD unigram file.
 - `PI_DISABLE_SPACY=1`: disables spaCy loading if you do not need NER features.
 
@@ -175,12 +221,16 @@ PI scores describe cues present in a message. They should not be interpreted as 
 
 - **Evidence** features detect evidence-like signals such as statistics, attribution phrases, and named entities. They do not perform external fact-checking or verify whether a claim is true.
 - **Logic/Cohesion** features detect explicit structural and discourse markers. They do not prove that an argument is formally valid.
-- **Sentiment** combines VADER affective intensity, affective lexicons, LIWC-style categories, and optional NRC-VAD ratings.
+- **Sentiment** combines VADER affective intensity, project lexicons, and, when locally configured, LIWC categories and NRC-VAD ratings.
 - **Weighted profile scores** in `persuasion_profile.py` use stored UKP coefficients. They are an empirical UKP-oriented output, not a context-free persuasion score.
 
 ## Scope and limitations
 
-The current implementation targets English argumentative text. Its lexicons, tokenization, concreteness resources, VADER model, LIWC-style categories, and optional NRC-VAD ratings are English-specific.
+The current implementation targets English argumentative text. Its lexicons,
+tokenization, VADER model, and optional external resources are English-specific.
+Scores produced without optional third-party resources are valid partial
+outputs but are not numerically equivalent to the full configuration described
+in the paper.
 
 PI analyzes rhetorical choices encoded in a message. It does not observe audience attitudes, source reputation, relationship history, or the surrounding social context, all of which can affect persuasive outcomes. Surface-level detectors also have limited coverage of implicit framing, irony, sarcasm, long-range narrative structure, and cross-sentence argumentation.
 

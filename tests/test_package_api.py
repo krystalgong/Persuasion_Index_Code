@@ -10,7 +10,12 @@ from unittest.mock import patch
 import pandas as pd
 
 import persuasion_index
-from PI_score_generator import _load_nrc_vad
+from PI_score_generator import (
+    _load_concreteness_dic,
+    _load_liwc_dic,
+    _load_mwe_concreteness_dic,
+    _load_nrc_vad,
+)
 
 
 class PublicApiTests(unittest.TestCase):
@@ -78,6 +83,60 @@ class PublicApiTests(unittest.TestCase):
                 vad = _load_nrc_vad()
             _load_nrc_vad.cache_clear()
             self.assertEqual(vad["example"], (0.6, 0.4, 0.5))
+
+    def test_standard_liwc_dictionary_override(self):
+        with tempfile.TemporaryDirectory() as temp_dir:
+            liwc_file = Path(temp_dir) / "LIWC.dic"
+            liwc_file.write_text(
+                "%\n"
+                "1 Ppron\n"
+                "2 You\n"
+                "%\n"
+                "you 1 2\n"
+                "your* 1 2\n",
+                encoding="utf-8",
+            )
+            with patch.dict(
+                os.environ,
+                {"PI_LIWC_FILE": str(liwc_file)},
+                clear=False,
+            ):
+                _load_liwc_dic.cache_clear()
+                liwc = _load_liwc_dic()
+            _load_liwc_dic.cache_clear()
+            self.assertEqual(liwc["You"], ["you", "your*"])
+            self.assertEqual(liwc["Ppron"], ["you", "your*"])
+
+    def test_concreteness_path_overrides(self):
+        with tempfile.TemporaryDirectory() as temp_dir:
+            single_file = Path(temp_dir) / "single.tsv"
+            single_file.write_text(
+                "Word\tConc.M\n"
+                "tree\t4.8\n",
+                encoding="utf-8",
+            )
+            mwe_file = Path(temp_dir) / "multiword.csv"
+            mwe_file.write_text(
+                "Expression,Mean_C\n"
+                "washing machine,4.5\n",
+                encoding="utf-8-sig",
+            )
+            with patch.dict(
+                os.environ,
+                {
+                    "PI_CONCRETENESS_FILE": str(single_file),
+                    "PI_MWE_CONCRETENESS_FILE": str(mwe_file),
+                },
+                clear=False,
+            ):
+                _load_concreteness_dic.cache_clear()
+                _load_mwe_concreteness_dic.cache_clear()
+                single = _load_concreteness_dic()
+                multiword = _load_mwe_concreteness_dic()
+            _load_concreteness_dic.cache_clear()
+            _load_mwe_concreteness_dic.cache_clear()
+            self.assertEqual(single["tree"], 4.8)
+            self.assertEqual(multiword["washing machine"], 4.5)
 
 
 if __name__ == "__main__":

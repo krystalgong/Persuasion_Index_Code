@@ -54,7 +54,6 @@ persuasion-index = "persuasion_index.cli:main"
 packages = [
     "persuasion_index",
     "helper_features",
-    "helper_features.Convokit_Politeness",
     "helper_features.regression_outputs",
 ]
 py-modules = [
@@ -67,12 +66,8 @@ include-package-data = true
 
 [tool.setuptools.package-data]
 helper_features = [
-    "*.csv",
     "*.json",
-    "*.txt",
-    "*.xlsx",
 ]
-"helper_features.Convokit_Politeness" = ["*.json"]
 "helper_features.regression_outputs" = ["*.csv"]
 
 [tool.pytest.ini_options]

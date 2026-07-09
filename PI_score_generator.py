@@ -80,6 +80,14 @@ def get_helper_dir() -> Path:
 
 HELPER_DIR = get_helper_dir()
 
+
+def _resource_path(env_name: str, default_relative_path: str | Path) -> Path:
+    """Resolve an optional external resource without moving the helper directory."""
+    configured_path = _clean_env_value(env_name)
+    if configured_path:
+        return _resolve_local_path(configured_path)
+    return get_helper_dir() / default_relative_path
+
 # =========================================================
 # 0) HELPERS & GLOBALS
 # =========================================================
@@ -305,18 +313,55 @@ RE_SOFT_ACK = re.compile(
 
 @lru_cache(maxsize=1)
 def _load_liwc_dic() -> Dict[str, list]:
-    path = get_helper_dir() / "en_liwc.txt"
+    path = _resource_path("PI_LIWC_FILE", "en_liwc.txt")
     dic: Dict[str, list] = {}
-    with path.open("r", encoding="utf-8", errors="ignore") as f:
-        for line in f:
+    if not path.exists():
+        logger.warning(
+            "LIWC-compatible dictionary unavailable. LIWC-derived portions of "
+            "several Sentiment, Engagement, and Specificity subfeatures will be "
+            "0.0. Set PI_LIWC_FILE to a dictionary you are licensed to use."
+        )
+        return dic
+
+    try:
+        lines = path.read_text(encoding="utf-8-sig", errors="ignore").splitlines()
+        percent_lines = [i for i, line in enumerate(lines) if line.strip() == "%"]
+
+        # Standard LIWC .dic format: category table between two '%' lines,
+        # followed by word/pattern rows keyed by numeric category identifiers.
+        if len(percent_lines) >= 2:
+            category_names: Dict[str, str] = {}
+            for line in lines[percent_lines[0] + 1:percent_lines[1]]:
+                parts = line.strip().split()
+                if len(parts) >= 2:
+                    category_names[parts[0]] = parts[1]
+                    dic.setdefault(parts[1], [])
+
+            for line in lines[percent_lines[1] + 1:]:
+                parts = line.strip().split()
+                if len(parts) < 2:
+                    continue
+                term = parts[0]
+                for category_id in parts[1:]:
+                    category_name = category_names.get(category_id)
+                    if category_name:
+                        dic[category_name].append(term)
+            return dic
+
+        # Compact project-compatible format: Category: term1 term2 term3
+        for line in lines:
             line = line.strip()
-            if not line or line.startswith("#"):
+            if not line or line.startswith("#") or ":" not in line:
                 continue
-            if ": " not in line:
-                continue
-            key, rest = line.split(": ", 1)
-            toks = [t.strip() for t in rest.split() if t.strip()]
-            dic[key] = toks
+            key, rest = line.split(":", 1)
+            dic[key.strip()] = [token for token in rest.split() if token]
+    except Exception as e:
+        logger.warning(
+            "Could not read LIWC-compatible dictionary at %s. "
+            "LIWC-derived cues will be unavailable. Error: %s",
+            path,
+            e,
+        )
     return dic
 
 _LIWC_REGEX_CACHE: Dict[str, re.Pattern] = {}
@@ -393,61 +438,106 @@ def _load_concreteness_dic() -> Dict[str, float]:
     Returns {} if missing/unreadable.
     Uses openpyxl read_only mode for low memory overhead.
     """
-    path = get_helper_dir() / "Brysbaert_concretness_dataset.xlsx"
+    path = _resource_path(
+        "PI_CONCRETENESS_FILE",
+        "Brysbaert_concretness_dataset.xlsx",
+    )
     if not path.exists():
+        logger.warning(
+            "Single-word concreteness ratings unavailable. "
+            "Specificity.lexical_concreteness will use multiword ratings if "
+            "available, otherwise the neutral baseline 0.5. "
+            "Set PI_CONCRETENESS_FILE to a locally obtained ratings file."
+        )
         return {}
 
     try:
-        from openpyxl import load_workbook  # lazy import
-        wb = load_workbook(filename=str(path), read_only=True, data_only=True)
-        ws = wb.active
-
-        rows = ws.iter_rows(values_only=True)
-        header = next(rows, None)
-        if not header:
-            return {}
-
-        header_map = {str(v).strip(): i for i, v in enumerate(header) if v is not None}
-        if "Word" not in header_map or "Conc.M" not in header_map:
-            return {}
-
-        w_idx = header_map["Word"]
-        c_idx = header_map["Conc.M"]
-
         out: Dict[str, float] = {}
-        for r in rows:
-            if not r:
-                continue
-            if w_idx >= len(r) or c_idx >= len(r):
-                continue
-            w = r[w_idx]
-            c = r[c_idx]
-            if w is None or c is None:
-                continue
-            ws_ = str(w).strip().lower()
-            if not ws_:
-                continue
-            try:
-                out[ws_] = float(c)
-            except Exception:
-                continue
+        if path.suffix.lower() == ".xlsx":
+            from openpyxl import load_workbook  # lazy import
+
+            workbook = load_workbook(
+                filename=str(path),
+                read_only=True,
+                data_only=True,
+            )
+            worksheet = workbook.active
+            rows = worksheet.iter_rows(values_only=True)
+            header = next(rows, None)
+            if not header:
+                return out
+
+            header_map = {
+                str(value).strip(): i
+                for i, value in enumerate(header)
+                if value is not None
+            }
+            if "Word" not in header_map or "Conc.M" not in header_map:
+                raise ValueError("expected columns 'Word' and 'Conc.M'")
+
+            word_index = header_map["Word"]
+            score_index = header_map["Conc.M"]
+            for row in rows:
+                if (
+                    not row
+                    or word_index >= len(row)
+                    or score_index >= len(row)
+                    or row[word_index] is None
+                    or row[score_index] is None
+                ):
+                    continue
+                word = str(row[word_index]).strip().lower()
+                if word:
+                    out[word] = float(row[score_index])
+        else:
+            delimiter = "\t" if path.suffix.lower() in {".txt", ".tsv"} else ","
+            with path.open("r", encoding="utf-8-sig", newline="") as file:
+                reader = csv.DictReader(file, delimiter=delimiter)
+                if not reader.fieldnames or not {"Word", "Conc.M"} <= set(reader.fieldnames):
+                    raise ValueError("expected columns 'Word' and 'Conc.M'")
+                for row in reader:
+                    word = (row.get("Word") or "").strip().lower()
+                    score = (row.get("Conc.M") or "").strip()
+                    if word and score:
+                        out[word] = float(score)
 
         return out
     except Exception as e:
-        logger.warning("Concreteness dataset unavailable. lexical_concreteness will use baseline. Error: %s", e)
+        logger.warning(
+            "Could not read single-word concreteness ratings at %s. "
+            "Specificity.lexical_concreteness may be incomplete. Error: %s",
+            path,
+            e,
+        )
         return {}
     
 @lru_cache(maxsize=1)
 def _load_mwe_concreteness_dic(path: str | Path | None = None):
     mwe_dic = {}
+    configured_path = _clean_env_value("PI_MWE_CONCRETENESS_FILE")
     mwe_path = (
         _resolve_local_path(path)
         if path is not None
-        else get_helper_dir() / "MultiwordExpression_Concreteness_Ratings.csv"
+        else (
+            _resolve_local_path(configured_path)
+            if configured_path
+            else get_helper_dir() / "MultiwordExpression_Concreteness_Ratings.csv"
+        )
     )
+    if not mwe_path.exists():
+        logger.warning(
+            "Multiword concreteness ratings unavailable. "
+            "Specificity.lexical_concreteness will use single-word ratings if "
+            "available, otherwise the neutral baseline 0.5. "
+            "Set PI_MWE_CONCRETENESS_FILE to a locally obtained ratings file."
+        )
+        return mwe_dic
+
     try:
-        with mwe_path.open("r", encoding="utf-8") as f:
+        with mwe_path.open("r", encoding="utf-8-sig", newline="") as f:
             reader = csv.DictReader(f)
+            if not reader.fieldnames or not {"Expression", "Mean_C"} <= set(reader.fieldnames):
+                raise ValueError("expected columns 'Expression' and 'Mean_C'")
             for row in reader:
                 expr = row["Expression"].strip().lower()
                 score = row["Mean_C"]
@@ -456,24 +546,27 @@ def _load_mwe_concreteness_dic(path: str | Path | None = None):
                     continue
 
                 mwe_dic[expr] = float(score)
-    except Exception:
+    except Exception as e:
+        logger.warning(
+            "Could not read multiword concreteness ratings at %s. "
+            "Specificity.lexical_concreteness may be incomplete. Error: %s",
+            mwe_path,
+            e,
+        )
         return {}
 
     return mwe_dic
     
 @lru_cache(maxsize=1)
 def _load_nrc_vad(path: str | Path | None = None):
-    configured_path = _clean_env_value("PI_NRC_VAD_FILE")
     vad_path = (
         _resolve_local_path(path)
         if path is not None
-        else (
-            _resolve_local_path(configured_path)
-            if configured_path
-            else get_helper_dir()
-            / "NRC-VAD-Lexicon-v2.1"
+        else _resource_path(
+            "PI_NRC_VAD_FILE",
+            Path("NRC-VAD-Lexicon-v2.1")
             / "Unigrams"
-            / "unigrams-NRC-VAD-Lexicon-v2.1.txt"
+            / "unigrams-NRC-VAD-Lexicon-v2.1.txt",
         )
     )
     vad = {}
