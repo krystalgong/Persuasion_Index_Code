@@ -126,6 +126,16 @@ These fallbacks keep the API and vector dimensions stable. They are intended
 for graceful execution, not as a claim of complete feature reproduction.
 See `THIRD_PARTY_RESOURCES.md` for the full resource table.
 
+Missing-resource warnings are enabled by default so partial output is visible.
+For a known minimal configuration, they can be suppressed explicitly:
+
+```bash
+export PI_QUIET_OPTIONAL_WARNINGS=1
+```
+
+This setting only suppresses warnings for absent optional resources. Invalid
+configured files and required-resource failures are still reported.
+
 ## Configuration
 
 The LLM expansion scripts load API settings from a repository-level `.env`:
@@ -148,6 +158,7 @@ Important config values:
 - `PI_MWE_CONCRETENESS_FILE`: path to multiword-expression concreteness ratings.
 - `PI_NRC_VAD_FILE`: optional path to a separately downloaded NRC-VAD unigram file.
 - `PI_DISABLE_SPACY=1`: disables spaCy loading if you do not need NER features.
+- `PI_QUIET_OPTIONAL_WARNINGS=1`: suppresses known missing-resource warnings.
 
 The scoring library reads `PI_*` values from the process environment. The
 repository's LLM expansion runner also loads them from `.env`. Blank path
@@ -205,6 +216,50 @@ through standard input:
 
 ```bash
 echo "This plan is urgent." | persuasion-index --profile
+```
+
+For a compact smoke test without optional-resource warnings:
+
+```bash
+PI_DISABLE_SPACY=1 PI_QUIET_OPTIONAL_WARNINGS=1 \
+  persuasion-index --compact "This is urgent."
+```
+
+## Quick verification
+
+The following checks installation, the 15-dimension/55-subfeature schema,
+batch scoring, and the stored UKP profile:
+
+```bash
+python -m pip install -e ".[dev,notebooks]"
+python -m pytest -q
+
+python - <<'PY'
+from persuasion_index import get_report, score, score_batch
+import pandas as pd
+
+scores = score(
+    "According to recent studies, this policy will reduce costs by 20%."
+)
+assert len(scores) == 15
+assert sum(len(values) - 1 for values in scores.values()) == 55
+
+subfeatures, dimensions = score_batch(
+    pd.DataFrame(
+        {"argument": ["This is urgent.", "The evidence is mixed."]}
+    )
+)
+assert subfeatures.shape == (2, 55)
+assert dimensions.shape == (2, 15)
+
+raw, weighted = get_report(
+    "This proposal is practical and evidence-based."
+)
+assert len(raw) == 15
+assert weighted is not None
+
+print("Persuasion Index smoke test passed.")
+PY
 ```
 
 ## How scoring works
@@ -279,3 +334,11 @@ python apply_audit.py \
 ```
 
 The default deployment lexicon in this repository is `helper_features/lexicons_expanded_LLM_audited.json`.
+
+## License
+
+Unless otherwise stated, the project code, documentation, and project-created
+PI lexicons are released under the [Apache License 2.0](LICENSE).
+
+Third-party resources are not redistributed and remain subject to their
+original licenses and terms. See `THIRD_PARTY_RESOURCES.md`.

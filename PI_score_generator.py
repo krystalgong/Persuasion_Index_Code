@@ -43,6 +43,16 @@ def _clean_env_value(name: str) -> str | None:
     return value or None
 
 
+def _env_flag(name: str) -> bool:
+    return os.environ.get(name, "").strip().lower() in {"1", "true", "yes", "on"}
+
+
+def _optional_warning(message: str, *args: Any) -> None:
+    """Warn about an optional missing resource unless quiet mode is enabled."""
+    if not _env_flag("PI_QUIET_OPTIONAL_WARNINGS"):
+        logger.warning(message, *args)
+
+
 def _resolve_local_path(path: str | Path, *, base: Path = BASE_DIR) -> Path:
     local_path = Path(path).expanduser()
     if local_path.is_absolute():
@@ -316,7 +326,7 @@ def _load_liwc_dic() -> Dict[str, list]:
     path = _resource_path("PI_LIWC_FILE", "en_liwc.txt")
     dic: Dict[str, list] = {}
     if not path.exists():
-        logger.warning(
+        _optional_warning(
             "LIWC-compatible dictionary unavailable. LIWC-derived portions of "
             "several Sentiment, Engagement, and Specificity subfeatures will be "
             "0.0. Set PI_LIWC_FILE to a dictionary you are licensed to use."
@@ -409,13 +419,17 @@ def _get_nlp():
     spaCy is heavy. Load once per worker process.
     You can disable spaCy loading by setting PI_DISABLE_SPACY=1.
     """
-    if os.environ.get("PI_DISABLE_SPACY", "").strip() == "1":
+    if _env_flag("PI_DISABLE_SPACY"):
         return None
     try:
         import spacy  # imported lazily
         return spacy.load("en_core_web_sm")
     except Exception as e:
-        logger.warning("spaCy model unavailable (en_core_web_sm). NER-based features will be 0.0. Error: %s", e)
+        _optional_warning(
+            "spaCy model unavailable (en_core_web_sm). "
+            "NER-based features will be 0.0. Error: %s",
+            e,
+        )
         return None
 
 @lru_cache(maxsize=1)
@@ -443,7 +457,7 @@ def _load_concreteness_dic() -> Dict[str, float]:
         "Brysbaert_concretness_dataset.xlsx",
     )
     if not path.exists():
-        logger.warning(
+        _optional_warning(
             "Single-word concreteness ratings unavailable. "
             "Specificity.lexical_concreteness will use multiword ratings if "
             "available, otherwise the neutral baseline 0.5. "
@@ -525,7 +539,7 @@ def _load_mwe_concreteness_dic(path: str | Path | None = None):
         )
     )
     if not mwe_path.exists():
-        logger.warning(
+        _optional_warning(
             "Multiword concreteness ratings unavailable. "
             "Specificity.lexical_concreteness will use single-word ratings if "
             "available, otherwise the neutral baseline 0.5. "
@@ -570,6 +584,13 @@ def _load_nrc_vad(path: str | Path | None = None):
         )
     )
     vad = {}
+    if not vad_path.exists():
+        _optional_warning(
+            "NRC-VAD lexicon unavailable. VAD features will be 0.0. "
+            "Set PI_NRC_VAD_FILE to a locally obtained unigram TSV file."
+        )
+        return vad
+
     try:
         with vad_path.open("r", encoding="utf-8") as f:
             reader = csv.DictReader(f, delimiter="\t")
@@ -581,7 +602,12 @@ def _load_nrc_vad(path: str | Path | None = None):
                     float(row["dominance"]),
                 )
     except Exception as e:
-        logger.warning("NRC-VAD lexicon unavailable. VAD features will be 0.0. Error: %s", e)
+        logger.warning(
+            "Could not read NRC-VAD lexicon at %s. "
+            "VAD features will be 0.0. Error: %s",
+            vad_path,
+            e,
+        )
     return vad
 
 # =========================================================

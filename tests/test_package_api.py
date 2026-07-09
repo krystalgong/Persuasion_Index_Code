@@ -66,6 +66,34 @@ class PublicApiTests(unittest.TestCase):
         output = json.loads(result.stdout)
         self.assertEqual(len(output), 15)
 
+    def test_optional_warning_quiet_mode(self):
+        env = os.environ.copy()
+        env["PI_DISABLE_SPACY"] = "1"
+        env["PI_QUIET_OPTIONAL_WARNINGS"] = "1"
+        for name in (
+            "PI_LIWC_FILE",
+            "PI_CONCRETENESS_FILE",
+            "PI_MWE_CONCRETENESS_FILE",
+            "PI_NRC_VAD_FILE",
+        ):
+            env.pop(name, None)
+
+        result = subprocess.run(
+            [
+                sys.executable,
+                "-m",
+                "persuasion_index.cli",
+                "--compact",
+                "This is urgent.",
+            ],
+            check=True,
+            capture_output=True,
+            text=True,
+            env=env,
+        )
+        json.loads(result.stdout)
+        self.assertEqual(result.stderr, "")
+
     def test_nrc_vad_path_override(self):
         with tempfile.TemporaryDirectory() as temp_dir:
             vad_file = Path(temp_dir) / "nrc-vad.tsv"
