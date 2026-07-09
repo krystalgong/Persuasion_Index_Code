@@ -4,10 +4,6 @@ Code and resources for **Persuasion Index: A Theory-Guided Framework for Persuas
 
 The Persuasion Index (PI) represents persuasive language through 15 theory-grounded rhetorical dimensions and 55 transparent lexicon- and rule-based subfeatures. It is designed for interpretable analysis of rhetorical cues in human- and AI-generated text.
 
-Try the interactive web interface:
-
-<a href="https://anonymous.4open.science/w/pi-1DE2/" target="_blank">PI Interactive GUI </a>
-
 ## Framework at a glance
 
 The 15 dimensions are organized under the Aristotelian triad:
