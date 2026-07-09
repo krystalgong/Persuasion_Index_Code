@@ -6,7 +6,7 @@ The Persuasion Index (PI) represents persuasive language through 15 theory-groun
 
 Try the interactive web interface:
 
-[https://anonymous.4open.science/w/pi-1DE2/](https://anonymous.4open.science/w/pi-1DE2/)
+<a href="https://anonymous.4open.science/w/pi-1DE2/" target="_blank">PI Interactive GUI </a>
 
 ## Framework at a glance
 
