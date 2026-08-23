@@ -122,7 +122,7 @@
 ],
  "PROP_LOADED": ["corrupt","evil","traitor","patriot","heroic","disgusting","shameful","glorious","coward"],
  "PROP_FEAR": ["threat","danger","destroy","terror","crime","invasion","collapse","death","attack"],
- "PROP_FLAG": ["nation","country","people","citizens","our","patriots","homeland"],
+ "PROP_FLAG": ["nation","country","people","citizens","our nation","our country","our people","our citizens","our homeland","patriots","homeland"],
  
  "PROP_NAMECALL": ["idiot", "fool", "liar", "corrupt", "fake", "terrorist", "puppet"],
  "PROP_DOUBT": ["questionable", "unreliable", "supposedly", "alleged", "so-called"], 

@@ -334,6 +334,58 @@ class PublicApiTests(unittest.TestCase):
             1.0,
         )
 
+    def test_empty_and_nonlexical_inputs_return_zero_schema(self):
+        reference = persuasion_index.score("A substantive sentence.")
+
+        for text in ("", " ", ".", "😀😀😀"):
+            result = persuasion_index.score(text)
+            self.assertEqual(tuple(result), tuple(reference))
+            self.assertEqual(len(result), 15)
+            self.assertEqual(
+                sum(len(values) - 1 for values in result.values()),
+                55,
+            )
+            for dimension, values in result.items():
+                self.assertEqual(
+                    tuple(values),
+                    tuple(reference[dimension]),
+                )
+                self.assertTrue(
+                    all(value == 0.0 for value in values.values()),
+                    (text, dimension, values),
+                )
+
+        numeric = persuasion_index.score("12345")
+        self.assertGreater(numeric["Evidence"]["statistical"], 0.0)
+
+    def test_composite_lexicon_matches_respect_word_boundaries(self):
+        neutral = persuasion_index.score(
+            "The committee discussed the proposal."
+        )
+        committed = persuasion_index.score(
+            "I am committed to the plan and can verify the results."
+        )
+
+        self.assertEqual(neutral["Commitment"]["statements"], 0.0)
+        self.assertEqual(neutral["Commitment"]["power"], 0.0)
+        self.assertEqual(committed["Commitment"]["statements"], 1.0)
+        self.assertEqual(committed["Commitment"]["power"], 1.0)
+
+    def test_identity_appeals_require_identity_context(self):
+        ordinary = persuasion_index.score("Please consider our request.")
+        identity = persuasion_index.score(
+            "Please stand with our nation and protect our homeland."
+        )
+
+        self.assertEqual(
+            ordinary["Propaganda"]["heuristic_identity_appeals"],
+            0.0,
+        )
+        self.assertGreater(
+            identity["Propaganda"]["heuristic_identity_appeals"],
+            0.0,
+        )
+
 
 if __name__ == "__main__":
     unittest.main()

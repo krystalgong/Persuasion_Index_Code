@@ -111,7 +111,7 @@ Install the wheel into a fresh environment outside the checkout and run:
 import persuasion_index as pi
 
 scores = pi.score("According to the evidence, this action is urgent.")
-assert pi.__version__ == "0.2.0rc5"
+assert pi.__version__ == "0.2.0rc6"
 assert len(scores) == 15
 assert sum(len(dimension) - 1 for dimension in scores.values()) == 55
 ```
@@ -135,7 +135,7 @@ This is the part that requires a human researcher rather than only CI.
 
 ## TestPyPI rehearsal
 
-Use the current release candidate, `0.2.0rc5`, for TestPyPI. Publish it there,
+Use the current release candidate, `0.2.0rc6`, for TestPyPI. Publish it there,
 then install dependencies from PyPI and the candidate itself from TestPyPI:
 
 ```bash
@@ -145,7 +145,7 @@ python -m pip install numpy pandas wordfreq vaderSentiment
 python -m pip install \
   --index-url https://test.pypi.org/simple/ \
   --no-deps \
-  persuasion-index==0.2.0rc5
+  persuasion-index==0.2.0rc6
 ```
 
 Run the distribution smoke test from a directory that is not the source

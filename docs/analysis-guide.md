@@ -30,7 +30,7 @@ python -m pip install numpy pandas wordfreq vaderSentiment
 python -m pip install \
   --index-url https://test.pypi.org/simple/ \
   --no-deps \
-  persuasion-index==0.2.0rc5
+  persuasion-index==0.2.0rc6
 ```
 
 In a Jupyter notebook, use `%pip` rather than `!pip` so installation targets
@@ -176,7 +176,9 @@ analysis.to_csv("pi_scores.csv")
 
 PI preserves the DataFrame index, so document identifiers can be joined back
 onto the results without relying on row order alone. Missing text values are
-currently treated as empty strings.
+treated as empty strings and receive an all-zero 15-dimension/55-subfeature
+row. Empty, whitespace-only, punctuation-only, and emoji-only strings follow
+the same contract.
 
 If an analysis requires every optional feature resource, reject an incomplete
 configuration explicitly:

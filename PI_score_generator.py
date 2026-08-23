@@ -221,7 +221,12 @@ def _compile_vocab_pattern(vocab: Set[str]) -> re.Pattern:
 #         _PATTERN_CACHE[cache_key] = pat
 #     return len(pat.findall(text))
 
-def _count_vocab(text: str, cache_key: str, vocab: Set[str]) -> int:
+def _vocab_spans(
+    text: str,
+    cache_key: str,
+    vocab: Set[str],
+) -> list[tuple[int, int]]:
+    """Return boundary-aware, non-contained lexicon match spans."""
     pat = _PATTERN_CACHE.get(cache_key)
     if pat is None:
         pat = _compile_vocab_pattern(vocab)
@@ -230,11 +235,15 @@ def _count_vocab(text: str, cache_key: str, vocab: Set[str]) -> int:
     # Collect all match spans, then remove any span fully contained within a longer match.
     # e.g. "besides" is absorbed by "besides that" — only the longer match counts.
     matches = [(m.start(), m.end()) for m in pat.finditer(text)]
-    non_overlapping = [
+    non_contained = [
         (s, e) for (s, e) in matches
         if not any(s2 <= s and e <= e2 and (s2, e2) != (s, e) for (s2, e2) in matches)
     ]
-    return len(non_overlapping)
+    return sorted(non_contained)
+
+
+def _count_vocab(text: str, cache_key: str, vocab: Set[str]) -> int:
+    return len(_vocab_spans(text, cache_key, vocab))
 
 def _count_lex(text: str, lex_key: str) -> int:
     lex = _load_lexicons().get(lex_key)
@@ -868,18 +877,13 @@ def opponent_refutation_strength(text: str) -> float:
         return 0.0
 
     t = re.sub(r"\s+", " ", text.lower())
-
-    idx_ack = -1
-    for p in opp_view:
-        idx = t.find(p)
-        if idx != -1:
-            idx_ack = idx
-            break
-
-    if idx_ack == -1:
+    acknowledgements = _vocab_spans(t, "OPP_VIEW", opp_view)
+    if not acknowledgements:
         return 0.0
 
-    has_refute = any(t.find(m, idx_ack) > idx_ack for m in contrast)
+    acknowledgement_end = acknowledgements[0][1]
+    refutations = _vocab_spans(t, "LOGIC_CONTRAST", contrast)
+    has_refute = any(start >= acknowledgement_end for start, _ in refutations)
     return 1.0 if has_refute else 0.5
 
 # =========================================================
@@ -998,18 +1002,13 @@ def commitment_power(text: str) -> float:
         return 0.0
 
     t = re.sub(r"\s+", " ", text.lower())
-
-    idx_commit = -1
-    for p in commitment:
-        idx = t.find(p)
-        if idx != -1:
-            idx_commit = idx
-            break
-
-    if idx_commit == -1:
+    commitments = _vocab_spans(t, "COMMITMENT", commitment)
+    if not commitments:
         return 0.0
 
-    has_power = any(t.find(m, idx_commit) > idx_commit for m in proof)
+    commitment_end = commitments[0][1]
+    proofs = _vocab_spans(t, "COMMITMENT_PROOF", proof)
+    has_power = any(start >= commitment_end for start, _ in proofs)
     return 1.0 if has_power else 0.5
 
 # =========================================================
@@ -1255,17 +1254,97 @@ def prop_heuristic_identity_appeals(text: str) -> float:
 # MASTER API
 # =========================================================
 
+_SCORE_SCHEMA = {
+    "Evidence": ("statistical", "attribution", "named_entities"),
+    "Specificity": (
+        "psychological_nearness",
+        "lexical_concreteness",
+        "interactional_immediacy",
+    ),
+    "Authority/Credibility": (
+        "titles",
+        "organizations",
+        "phrases",
+        "consensus",
+        "speech_power",
+    ),
+    "Logic/Cohesion": ("structural_reasoning", "discourse_cohesion"),
+    "Argumentation": (
+        "conclusion_explicitness",
+        "premise_density",
+        "quantity_intensity",
+        "style_sophistication",
+    ),
+    "Opponent’s View": ("acknowledge", "refutation_strength"),
+    "Sentiment": (
+        "vader_compound",
+        "language_intensity",
+        "fear_threat",
+        "joy_gain",
+        "anger",
+        "sadness",
+        "valence",
+        "arousal",
+        "dominance",
+    ),
+    "Politeness": (
+        "professional_courtesy",
+        "rapport_building",
+        "non_imposition",
+        "domineering",
+    ),
+    "Reciprocity": (
+        "direct_promise",
+        "mutual_benefit",
+        "concession_framing",
+    ),
+    "Impact": (
+        "gain_framing",
+        "loss_framing",
+        "threat_severity",
+        "future_projection",
+    ),
+    "Commitment": ("statements", "power"),
+    "Scarcity/Urgency": ("temporal_urgency", "exclusivity_quantity"),
+    "Engagement": (
+        "identification",
+        "self_reference",
+        "inquiry",
+        "past",
+        "imagery",
+        "characters",
+    ),
+    "Propaganda": (
+        "emotional_charge",
+        "logical_distortion",
+        "heuristic_identity_appeals",
+    ),
+    "Style": ("fluency", "length", "rhetorical_punctuation"),
+}
+
+
+def _empty_scores() -> Dict[str, Dict[str, float]]:
+    return {
+        dimension: {
+            **{feature: 0.0 for feature in features},
+            "mean": 0.0,
+        }
+        for dimension, features in _SCORE_SCHEMA.items()
+    }
+
 def score_all(text: str) -> Dict[str, Dict[str, float]]:
     """
     Return nested scores per category.
     Heavy resources are loaded lazily and cached per worker process.
     """
+    text = re.sub(r"\s+", " ", text.lower()).strip()
+    if not re.search(r"\w", text, flags=re.UNICODE):
+        return _empty_scores()
+
     nlp = _get_nlp()
     vader = _get_vader()
 
     out: Dict[str, Dict[str, float]] = {}
-
-    text = re.sub(r"\s+", " ", text.lower()).strip()
 
     out["Evidence"] = {
         "statistical": evidence_statistical(text),
