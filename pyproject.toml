@@ -4,20 +4,28 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "persuasion-index"
-version = "0.1.0"
+dynamic = ["version"]
 description = "Theory-guided, interpretable analysis of persuasive language"
 readme = "README.md"
 requires-python = ">=3.10"
 license = "Apache-2.0"
 license-files = ["LICENSE"]
+authors = [
+    {name = "Zhiyang Wang"},
+    {name = "Liancheng Gong"},
+]
+keywords = [
+    "persuasion",
+    "rhetoric",
+    "computational social science",
+    "natural language processing",
+    "text analysis",
+]
 dependencies = [
     "numpy>=1.24",
     "pandas>=2.0",
-    "openpyxl>=3.1",
     "wordfreq>=3.0",
     "vaderSentiment>=3.3.2",
-    "spacy>=3.7",
-    "click>=8.0",
 ]
 classifiers = [
     "Development Status :: 3 - Alpha",
@@ -26,11 +34,29 @@ classifiers = [
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Operating System :: OS Independent",
     "Topic :: Scientific/Engineering :: Information Analysis",
     "Topic :: Text Processing :: Linguistic",
 ]
 
+[project.urls]
+Homepage = "https://github.com/krystalgong/Persuasion_Index_Code"
+Repository = "https://github.com/krystalgong/Persuasion_Index_Code"
+Paper = "https://arxiv.org/abs/2606.14580"
+Issues = "https://github.com/krystalgong/Persuasion_Index_Code/issues"
+
 [project.optional-dependencies]
+spacy = [
+    "spacy>=3.7",
+]
+excel = [
+    "openpyxl>=3.1",
+]
+all = [
+    "spacy>=3.7",
+    "openpyxl>=3.1",
+]
 lexicon = [
     "openai>=1.0",
     "pydantic>=2.0",
@@ -47,6 +73,7 @@ notebooks = [
 dev = [
     "build>=1.2",
     "pytest>=8.0",
+    "twine>=5.0",
 ]
 
 [project.scripts]
@@ -65,6 +92,9 @@ py-modules = [
     "pi_config",
 ]
 include-package-data = true
+
+[tool.setuptools.dynamic]
+version = {attr = "persuasion_index._version.__version__"}
 
 [tool.setuptools.package-data]
 helper_features = [

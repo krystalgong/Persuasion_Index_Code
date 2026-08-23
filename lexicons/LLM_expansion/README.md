@@ -155,7 +155,7 @@ automatic cleaning, and human audit traceable:
    `(category, normalized word)`, and preserves all slice/register/rationale
    provenance for each merged item.
 3. The post-processor can separate records flagged as hard negatives into
-   `hard_negatives.json`. The paper-aligned default configuration uses seven
+   `hard_negatives.json`. The default configuration uses seven
    positive register- and morphology-conditioned slices, so this file is empty
    unless the input contains separately flagged records.
 4. `audit_priority.csv` sorts the riskiest items first. The current risk score

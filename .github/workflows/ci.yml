@@ -1,0 +1,125 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    name: ${{ matrix.os }} / Python ${{ matrix.python-version }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            python-version: "3.10"
+          - os: ubuntu-latest
+            python-version: "3.11"
+          - os: ubuntu-latest
+            python-version: "3.12"
+          - os: ubuntu-latest
+            python-version: "3.13"
+          - os: macos-latest
+            python-version: "3.12"
+          - os: windows-latest
+            python-version: "3.12"
+
+    steps:
+      - name: Check out source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+
+      - name: Set up Python
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: pip
+          cache-dependency-path: pyproject.toml
+
+      - name: Install package and test dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -e ".[dev]"
+
+      - name: Run tests
+        env:
+          PI_DISABLE_SPACY: "1"
+          PI_QUIET_OPTIONAL_WARNINGS: "1"
+        run: python -m pytest -q
+
+  optional-features:
+    name: Optional feature smoke test
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+
+      - name: Set up Python
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: pyproject.toml
+
+      - name: Install optional dependencies and spaCy model
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -e ".[dev,all]"
+          python -m spacy download en_core_web_sm
+
+      - name: Check spaCy-backed features
+        run: |
+          python -c 'import persuasion_index as pi; assert pi.check_resources()["spacy_model"]["available"]'
+          python -m pytest -q
+
+  package:
+    name: Build and inspect package
+    needs:
+      - test
+      - optional-features
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+
+      - name: Set up Python
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: pyproject.toml
+
+      - name: Install release tools
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install build twine
+
+      - name: Build distributions
+        run: python -m build
+
+      - name: Check metadata and README rendering
+        run: python -m twine check dist/*
+
+      - name: Audit distribution contents
+        run: python scripts/audit_dist.py dist/*
+
+      - name: Install wheel outside the checkout
+        shell: bash
+        run: |
+          python -m venv /tmp/pi-wheel-test
+          /tmp/pi-wheel-test/bin/python -m pip install dist/*.whl
+          cd /tmp
+          PI_DISABLE_SPACY=1 PI_QUIET_OPTIONAL_WARNINGS=1 \
+            /tmp/pi-wheel-test/bin/python -c \
+            'import persuasion_index as pi; result = pi.score("This plan is urgent."); assert len(result) == 15; assert sum(len(values) - 1 for values in result.values()) == 55'

@@ -1,0 +1,31 @@
+cff-version: 1.2.0
+message: >-
+  If you use Persuasion Index in academic work, please cite the paper below.
+title: Persuasion Index
+type: software
+version: 0.2.0rc4
+date-released: 2026-08-23
+license: Apache-2.0
+repository-code: https://github.com/krystalgong/Persuasion_Index_Code
+url: https://arxiv.org/abs/2606.14580
+authors:
+  - family-names: Wang
+    given-names: Zhiyang
+  - family-names: Gong
+    given-names: Liancheng
+preferred-citation:
+  type: article
+  title: "Persuasion Index: A Theory-Guided Framework for Persuasion Analysis"
+  authors:
+    - family-names: Gong
+      given-names: Liancheng
+    - family-names: Wang
+      given-names: Zhiyang
+    - family-names: Xu
+      given-names: Yiwei
+    - family-names: Mendelsohn
+      given-names: Julia
+  year: 2026
+  doi: 10.48550/arXiv.2606.14580
+  url: https://arxiv.org/abs/2606.14580
+  notes: Accepted to the EMNLP 2026 Main Conference
