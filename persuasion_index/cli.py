@@ -7,9 +7,7 @@ import json
 import sys
 from collections.abc import Sequence
 
-from . import __version__
-from .api import get_report, score
-from .resources import check_resources
+from ._version import __version__
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -70,6 +68,8 @@ def build_doctor_parser() -> argparse.ArgumentParser:
 
 
 def _doctor_main(argv: Sequence[str]) -> int:
+    from .resources import check_resources
+
     parser = build_doctor_parser()
     args = parser.parse_args(argv)
     statuses = check_resources()
@@ -119,6 +119,8 @@ def main(argv: Sequence[str] | None = None) -> int:
         parser.error("argument text cannot be empty")
 
     if args.profile:
+        from .api import get_report
+
         raw, weighted = get_report(
             text,
             lexicon=args.lexicon,
@@ -126,6 +128,8 @@ def main(argv: Sequence[str] | None = None) -> int:
         )
         result = {"scores": raw, "weighted_profile": weighted}
     else:
+        from .api import score
+
         result = score(
             text,
             lexicon=args.lexicon,

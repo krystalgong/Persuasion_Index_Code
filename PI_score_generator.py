@@ -129,9 +129,14 @@ def _optional_doc(nlp: Any, text: str):
 @lru_cache(maxsize=2)
 def _load_lexicons() -> Dict[str, Any]:
     """
-    Loads lexicons.json and normalizes:
+    Load the selected lexicon and normalize:
       - list -> set
       - dict[str, list] -> dict[str, set]
+
+    The bundled expanded lexicon is an overlay on the seeded lexicon. This
+    keeps every seeded category and item while replacing or extending the
+    categories audited by the expansion pipeline. Custom PI_LEXICON_FILE
+    values are loaded as provided.
     """
     helper_dir = get_helper_dir()
     filename = _clean_env_value("PI_LEXICON_FILE")
@@ -150,6 +155,15 @@ def _load_lexicons() -> Dict[str, Any]:
     with path.open("r", encoding="utf-8") as f:
         data = json.load(f)
 
+    bundled_expanded = (
+        helper_dir / "lexicons_expanded_LLM_audited.json"
+    ).resolve()
+    if path == bundled_expanded:
+        seeded_path = (helper_dir / "lexicons.json").resolve()
+        with seeded_path.open("r", encoding="utf-8") as f:
+            seeded_data = json.load(f)
+        data = _merge_lexicon_data(seeded_data, data)
+
     norm: Dict[str, Any] = {}
     for k, v in data.items():
         if isinstance(v, list):
@@ -162,6 +176,24 @@ def _load_lexicons() -> Dict[str, Any]:
         else:
             norm[k] = v
     return norm
+
+
+def _merge_lexicon_data(base: Any, expanded: Any) -> Any:
+    """Recursively overlay expanded data while retaining all seed entries."""
+    if isinstance(base, dict) and isinstance(expanded, dict):
+        merged = dict(base)
+        for key, value in expanded.items():
+            merged[key] = (
+                _merge_lexicon_data(merged[key], value)
+                if key in merged
+                else value
+            )
+        return merged
+
+    if isinstance(base, list) and isinstance(expanded, list):
+        return list(dict.fromkeys([*base, *expanded]))
+
+    return expanded
 
 _PATTERN_CACHE: Dict[str, re.Pattern] = {}
 

@@ -13,9 +13,11 @@ import persuasion_index
 from PI_score_generator import (
     _load_concreteness_dic,
     _load_liwc_dic,
+    _load_lexicons,
     _load_mwe_concreteness_dic,
     _load_nrc_vad,
 )
+from persuasion_runner import run_expanded_lexicons
 
 
 class PublicApiTests(unittest.TestCase):
@@ -238,6 +240,99 @@ class PublicApiTests(unittest.TestCase):
             text=True,
         )
         self.assertIn(persuasion_index.__version__, result.stdout)
+
+    def test_package_and_version_command_use_lightweight_imports(self):
+        code = (
+            "import sys; import persuasion_index; "
+            "assert 'pandas' not in sys.modules; "
+            "assert 'PI_score_generator' not in sys.modules; "
+            "print(persuasion_index.__version__)"
+        )
+        package_result = subprocess.run(
+            [sys.executable, "-c", code],
+            check=True,
+            capture_output=True,
+            text=True,
+        )
+        self.assertEqual(
+            package_result.stdout.strip(),
+            persuasion_index.__version__,
+        )
+
+        version_result = subprocess.run(
+            [
+                sys.executable,
+                "-X",
+                "importtime",
+                "-m",
+                "persuasion_index.cli",
+                "--version",
+            ],
+            check=True,
+            capture_output=True,
+            text=True,
+        )
+        self.assertNotIn("pandas", version_result.stderr)
+        self.assertNotIn("PI_score_generator", version_result.stderr)
+
+    def test_expanded_lexicon_retains_every_seed_entry(self):
+        try:
+            run_expanded_lexicons(False)
+            seeded = _load_lexicons()
+            run_expanded_lexicons(True)
+            expanded = _load_lexicons()
+
+            self.assertLessEqual(set(seeded), set(expanded))
+            for key, seeded_value in seeded.items():
+                expanded_value = expanded[key]
+                if isinstance(seeded_value, set):
+                    self.assertLessEqual(seeded_value, expanded_value, key)
+                elif isinstance(seeded_value, dict):
+                    self.assertLessEqual(
+                        set(seeded_value),
+                        set(expanded_value),
+                        key,
+                    )
+                    for nested_key, nested_seeded in seeded_value.items():
+                        nested_expanded = expanded_value[nested_key]
+                        if isinstance(nested_seeded, set):
+                            self.assertLessEqual(
+                                nested_seeded,
+                                nested_expanded,
+                                f"{key}.{nested_key}",
+                            )
+        finally:
+            run_expanded_lexicons(True)
+
+    def test_representative_cues_raise_expected_features(self):
+        neutral = persuasion_index.score(
+            "The committee discussed the proposal during its meeting."
+        )
+        evidence = persuasion_index.score(
+            "According to a 2025 survey of 1,200 participants, "
+            "the policy reduced costs by 20%."
+        )
+        urgency = persuasion_index.score(
+            "Act now. Only three places remain, and this offer expires tonight."
+        )
+        opponent = persuasion_index.score(
+            "On the other hand, the current approach has limitations. "
+            "However, this alternative is better."
+        )
+
+        self.assertGreater(
+            evidence["Evidence"]["mean"],
+            neutral["Evidence"]["mean"],
+        )
+        self.assertGreater(
+            urgency["Scarcity/Urgency"]["mean"],
+            neutral["Scarcity/Urgency"]["mean"],
+        )
+        self.assertEqual(opponent["Opponent’s View"]["acknowledge"], 1.0)
+        self.assertEqual(
+            opponent["Opponent’s View"]["refutation_strength"],
+            1.0,
+        )
 
 
 if __name__ == "__main__":
