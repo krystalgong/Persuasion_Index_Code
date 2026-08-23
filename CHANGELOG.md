@@ -5,6 +5,22 @@ PEP 440 and semantic-versioning conventions.
 
 ## [Unreleased]
 
+## [0.2.0rc5] - 2026-08-23
+
+### Fixed
+
+- Made the bundled expanded lexicon retain every seeded category and item,
+  restoring default coverage for Opponent’s View and other affected features.
+- Kept `persuasion-index --version` and a plain package import from loading
+  pandas, NumPy, and the scoring stack.
+
+### Changed
+
+- Expanded the usage and analysis guide with resource-aware interpretation,
+  TestPyPI, export, troubleshooting, and reproducibility workflows.
+- Added semantic cue checks and expanded-lexicon completeness tests alongside
+  the existing schema and range tests.
+
 ## [0.2.0rc4] - 2026-08-23
 
 ### Changed
@@ -60,7 +76,8 @@ PEP 440 and semantic-versioning conventions.
 - Removed the unused `click` runtime dependency. The CLI continues to use the
   Python standard library's `argparse` module.
 
-[Unreleased]: https://github.com/krystalgong/Persuasion_Index_Code/compare/v0.2.0rc4...HEAD
+[Unreleased]: https://github.com/krystalgong/Persuasion_Index_Code/compare/v0.2.0rc5...HEAD
+[0.2.0rc5]: https://github.com/krystalgong/Persuasion_Index_Code/compare/v0.2.0rc4...v0.2.0rc5
 [0.2.0rc4]: https://github.com/krystalgong/Persuasion_Index_Code/compare/v0.2.0rc3...v0.2.0rc4
 [0.2.0rc3]: https://github.com/krystalgong/Persuasion_Index_Code/compare/v0.2.0rc2...v0.2.0rc3
 [0.2.0rc2]: https://github.com/krystalgong/Persuasion_Index_Code/compare/v0.2.0rc1...v0.2.0rc2

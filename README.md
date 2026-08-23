@@ -42,19 +42,28 @@ That is enough to start. Scoring does not use a web service or require an API
 key. A few features can use additional linguistic resources; the base package
 still runs when those resources are absent.
 
+For a complete first analysis—from checking resource coverage to exporting a
+DataFrame—see the [usage and analysis guide](https://github.com/krystalgong/Persuasion_Index_Code/blob/main/docs/analysis-guide.md).
+
 ## What PI returns
 
 PI organizes its dimensions around the Aristotelian triad:
 
 | Appeal | Dimensions |
 |---|---|
-| **Logos** | Evidence, Logic/Cohesion, Argumentation, Specificity, Opponent's View |
+| **Logos** | Evidence, Logic/Cohesion, Argumentation, Specificity, Opponent’s View |
 | **Ethos** | Authority/Credibility, Politeness, Commitment, Style |
 | **Pathos** | Sentiment, Impact, Engagement, Reciprocity, Scarcity/Urgency, Propaganda |
 
 Every subfeature and dimension score is in `[0, 1]`. A result contains all 55
 subfeatures as well as the mean for each of the 15 dimensions, so it is possible
 to inspect why two texts receive different profiles.
+
+Before comparing dimension means, run `persuasion-index doctor`. Missing
+optional resources keep the output schema stable, but their fallback values
+still affect the means. Compare texts only when they were scored with the same
+PI version, lexicon choice, and resource configuration; the
+[usage guide](https://github.com/krystalgong/Persuasion_Index_Code/blob/main/docs/analysis-guide.md#3-understand-resource-coverage) explains this with examples.
 
 ## Installation options
 

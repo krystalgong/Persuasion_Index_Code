@@ -1,11 +1,12 @@
-# Persuasion Index analysis guide
+# Persuasion Index usage and analysis guide
 
 Persuasion Index (PI) is a Python library for descriptive and comparative text
 analysis. It extracts 55 interpretable subfeatures and aggregates them into 15
-theory-guided dimensions. PI does not require a web service or an API key for
-scoring.
+theory-guided dimensions. This guide covers the path from a clean installation
+to an analysis table that can be inspected, exported, and reproduced. PI does
+not require a web service or an API key for scoring.
 
-## 1. Installation
+## 1. Install in a clean environment
 
 Create an isolated environment and install the package:
 
@@ -15,6 +16,26 @@ source .venv/bin/activate
 python -m pip install --upgrade pip
 python -m pip install persuasion-index
 ```
+
+Avoid installing into an existing Conda `base` environment. Scientific
+environments often contain compiled packages tied to a particular NumPy
+version, and upgrading only part of that stack can make unrelated packages
+fail to import.
+
+For the current TestPyPI release candidate, install dependencies from PyPI and
+PI itself from TestPyPI:
+
+```bash
+python -m pip install numpy pandas wordfreq vaderSentiment
+python -m pip install \
+  --index-url https://test.pypi.org/simple/ \
+  --no-deps \
+  persuasion-index==0.2.0rc5
+```
+
+In a Jupyter notebook, use `%pip` rather than `!pip` so installation targets
+the active kernel. Restart the kernel after installation if imports still
+resolve to an older environment.
 
 When installing from a local clone, replace the final command with:
 
@@ -50,6 +71,58 @@ print(scores["Evidence"]["mean"])
 The return value contains 15 dimension dictionaries. Each dictionary contains
 its subfeature scores and a `mean` entry.
 
+To inspect the strongest dimension means:
+
+```python
+top_dimensions = sorted(
+    ((name, values["mean"]) for name, values in scores.items()),
+    key=lambda item: item[1],
+    reverse=True,
+)
+
+for name, value in top_dimensions[:5]:
+    print(f"{name}: {value:.3f}")
+```
+
+PI scores describe cue intensity, not whether a claim is true and not the
+probability that every audience will be persuaded.
+
+## 3. Understand resource coverage
+
+Check the environment before interpreting dimension means:
+
+```bash
+persuasion-index doctor
+```
+
+The base installation is useful for trying PI and for analyses that need only
+the bundled features. It always returns the same 55-subfeature and 15-dimension
+schema, even when optional resources are absent. Stable shape does not mean
+identical feature coverage:
+
+- NER-dependent features are `0.0` without spaCy and `en_core_web_sm`.
+- LIWC-derived feature components are `0.0` without a configured licensed
+  dictionary.
+- NRC-VAD valence, arousal, and dominance are `0.0` without NRC-VAD.
+- Lexical concreteness uses the available ratings source, or a neutral `0.5`
+  fallback when neither source is configured.
+
+Each dimension `mean` is the unweighted mean of its defined subfeatures, so
+these fallback values affect the result. For example, a text can have a strong
+VADER sentiment score but a modest overall Sentiment mean when LIWC and NRC-VAD
+features are unavailable.
+
+For meaningful comparisons, score every text with the same:
+
+- PI package version;
+- `expanded` or `seeded` lexicon choice;
+- optional-resource configuration;
+- preprocessing procedure.
+
+Inspect relevant subfeatures alongside dimension means, especially in a base
+installation. Use `strict_resources=True` only when the analysis requires the
+complete optional feature configuration.
+
 Use the original seeded lexicons for comparisons with earlier experiments:
 
 ```python
@@ -60,7 +133,7 @@ expanded_scores = score(text, lexicon="expanded")
 Record the selected lexicon in papers and analysis artifacts. The expanded,
 audited lexicons are the default.
 
-## 3. Analyze a list of texts
+## 4. Analyze a list of texts
 
 ```python
 from persuasion_index import score_batch
@@ -79,7 +152,7 @@ print(dimensions.shape)   # (2, 15)
 Both outputs are pandas DataFrames. Subfeature columns use names such as
 `Evidence.statistical`; dimension columns use names such as `Evidence.mean`.
 
-## 4. Analyze a DataFrame
+## 5. Analyze a DataFrame
 
 ```python
 import pandas as pd
@@ -105,8 +178,8 @@ PI preserves the DataFrame index, so document identifiers can be joined back
 onto the results without relying on row order alone. Missing text values are
 currently treated as empty strings.
 
-If an analysis requires every optional feature resource, reject incomplete
-configurations explicitly:
+If an analysis requires every optional feature resource, reject an incomplete
+configuration explicitly:
 
 ```python
 subfeatures, dimensions = score_batch(
@@ -116,7 +189,7 @@ subfeatures, dimensions = score_batch(
 )
 ```
 
-## 5. Generate the UKP-weighted research profile
+## 6. Generate the UKP-weighted research profile
 
 ```python
 from persuasion_index import get_report
@@ -135,7 +208,7 @@ For general descriptive analysis, report the raw 15-dimension or 55-subfeature
 representation. Use the UKP profile only when its empirical context is relevant
 and identify it explicitly in the methods section.
 
-## 6. Optional resources
+## 7. Configure optional resources
 
 Resource paths are configured through environment variables:
 
@@ -161,15 +234,33 @@ persuasion-index doctor --json > pi-resource-manifest.json
 The JSON output includes resource availability, installed versions, source
 links, license notes, configured paths, and SHA256 hashes for local files.
 
-Warnings about absent optional resources are intentional: they make partial
-feature coverage visible. Suppress them only when a minimal configuration is a
-deliberate choice:
+Warnings about absent optional resources make partial feature coverage visible.
+After recording the configuration, suppress repeated warnings when a minimal
+configuration is deliberate:
 
 ```bash
 export PI_QUIET_OPTIONAL_WARNINGS=1
 ```
 
-## 7. Reproducibility checklist
+## 8. Export and reproduce an analysis
+
+For a typical DataFrame analysis, save dimension means, subfeatures, and the
+resource manifest together:
+
+```python
+subfeatures.to_csv("pi-subfeatures.csv")
+dimensions.to_csv("pi-dimensions.csv")
+```
+
+```bash
+persuasion-index doctor --json > pi-resource-manifest.json
+python -m pip freeze > requirements-lock.txt
+```
+
+These files answer three different questions: what PI returned, which optional
+features were available, and which package versions produced the result.
+
+## 9. Reproducibility checklist
 
 For an academic analysis, record:
 
@@ -183,16 +274,29 @@ For an academic analysis, record:
 - preprocessing applied before PI scoring;
 - the number and handling of empty or missing texts.
 
-Save an environment snapshot alongside the results:
-
-```bash
-python -m pip freeze > requirements-lock.txt
-```
-
 PI scores describe rhetorical cues encoded in a text. They do not verify facts,
 prove logical validity, or measure a context-free probability of persuasion.
 
-## 8. Citation
+## 10. Troubleshooting
+
+### The first command is slow
+
+The first real scoring call imports pandas, NumPy, and the scorer. Later calls
+in the same process are usually much faster. `persuasion-index --version` does
+not load the scoring stack as of `0.2.0rc5`.
+
+### NumPy reports `_ARRAY_API not found`
+
+The active environment contains a compiled package built for a different NumPy
+major version. Create a clean virtual or Conda environment instead of repairing
+`base` in place, then select that environment as the Jupyter kernel.
+
+### Optional-resource warnings fill the notebook
+
+Run `persuasion-index doctor` once, save the resource manifest, and set
+`PI_QUIET_OPTIONAL_WARNINGS=1` when the missing resources are intentional.
+
+## 11. Citation
 
 If PI is used in academic work, cite:
 
