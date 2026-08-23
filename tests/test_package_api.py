@@ -19,6 +19,18 @@ from PI_score_generator import (
 
 
 class PublicApiTests(unittest.TestCase):
+    def _missing_resource_env(self) -> dict[str, str]:
+        env = os.environ.copy()
+        env["PI_DISABLE_SPACY"] = "1"
+        for name in (
+            "PI_LIWC_FILE",
+            "PI_CONCRETENESS_FILE",
+            "PI_MWE_CONCRETENESS_FILE",
+            "PI_NRC_VAD_FILE",
+        ):
+            env.pop(name, None)
+        return env
+
     def test_single_text_shape_and_range(self):
         scores = persuasion_index.score(
             "According to a recent study, this plan could reduce costs by 20%."
@@ -67,16 +79,8 @@ class PublicApiTests(unittest.TestCase):
         self.assertEqual(len(output), 15)
 
     def test_optional_warning_quiet_mode(self):
-        env = os.environ.copy()
-        env["PI_DISABLE_SPACY"] = "1"
+        env = self._missing_resource_env()
         env["PI_QUIET_OPTIONAL_WARNINGS"] = "1"
-        for name in (
-            "PI_LIWC_FILE",
-            "PI_CONCRETENESS_FILE",
-            "PI_MWE_CONCRETENESS_FILE",
-            "PI_NRC_VAD_FILE",
-        ):
-            env.pop(name, None)
 
         result = subprocess.run(
             [
@@ -93,6 +97,48 @@ class PublicApiTests(unittest.TestCase):
         )
         json.loads(result.stdout)
         self.assertEqual(result.stderr, "")
+
+    def test_resource_doctor_json_reports_partial_configuration(self):
+        result = subprocess.run(
+            [
+                sys.executable,
+                "-m",
+                "persuasion_index.cli",
+                "doctor",
+                "--json",
+                "--strict",
+            ],
+            check=False,
+            capture_output=True,
+            text=True,
+            env=self._missing_resource_env(),
+        )
+        output = json.loads(result.stdout)
+        self.assertEqual(result.returncode, 1)
+        self.assertFalse(output["complete"])
+        self.assertIn("liwc", output["missing"])
+        self.assertIn("nrc_vad", output["missing"])
+        self.assertIn("Sentiment.anger", output["resources"]["liwc"]["features"])
+        self.assertEqual(
+            output["resources"]["nrc_vad"]["features"],
+            [
+                "Sentiment.valence",
+                "Sentiment.arousal",
+                "Sentiment.dominance",
+            ],
+        )
+
+    def test_strict_resource_mode_stops_partial_scoring(self):
+        with patch.dict(
+            os.environ,
+            self._missing_resource_env(),
+            clear=True,
+        ):
+            with self.assertRaises(persuasion_index.ResourceUnavailableError):
+                persuasion_index.score(
+                    "This is urgent.",
+                    strict_resources=True,
+                )
 
     def test_nrc_vad_path_override(self):
         with tempfile.TemporaryDirectory() as temp_dir:
@@ -165,6 +211,33 @@ class PublicApiTests(unittest.TestCase):
             _load_mwe_concreteness_dic.cache_clear()
             self.assertEqual(single["tree"], 4.8)
             self.assertEqual(multiword["washing machine"], 4.5)
+
+    def test_resource_doctor_handles_invalid_excel_file(self):
+        with tempfile.TemporaryDirectory() as temp_dir:
+            invalid_file = Path(temp_dir) / "invalid.xlsx"
+            invalid_file.write_text("not an Excel workbook", encoding="utf-8")
+            with patch.dict(
+                os.environ,
+                {"PI_CONCRETENESS_FILE": str(invalid_file)},
+                clear=False,
+            ):
+                status = persuasion_index.check_resources()[
+                    "single_word_concreteness"
+                ]
+            self.assertFalse(status["available"])
+            self.assertTrue(
+                status["detail"].startswith("Could not read Excel resource header:")
+                or "openpyxl is not installed" in status["detail"]
+            )
+
+    def test_cli_version_matches_package_version(self):
+        result = subprocess.run(
+            [sys.executable, "-m", "persuasion_index.cli", "--version"],
+            check=True,
+            capture_output=True,
+            text=True,
+        )
+        self.assertIn(persuasion_index.__version__, result.stdout)
 
 
 if __name__ == "__main__":
