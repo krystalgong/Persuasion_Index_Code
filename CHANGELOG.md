@@ -5,6 +5,23 @@ PEP 440 and semantic-versioning conventions.
 
 ## [Unreleased]
 
+## [0.2.0rc6] - 2026-08-23
+
+### Fixed
+
+- Made empty, whitespace-only, punctuation-only, and emoji-only inputs return
+  an all-zero result while preserving the 15-dimension/55-subfeature schema.
+- Replaced substring searches in composite Commitment and Opponent’s View
+  rules with boundary-aware, text-ordered lexicon matching.
+- Prevented `commit` from matching words such as `committee`.
+- Removed standalone `our` as a propaganda identity cue while retaining
+  identity phrases such as `our nation` and `our homeland`.
+
+### Changed
+
+- Documented the all-zero contract for empty and missing texts and added
+  semantic regression tests for the corrected edge cases.
+
 ## [0.2.0rc5] - 2026-08-23
 
 ### Fixed
@@ -76,7 +93,8 @@ PEP 440 and semantic-versioning conventions.
 - Removed the unused `click` runtime dependency. The CLI continues to use the
   Python standard library's `argparse` module.
 
-[Unreleased]: https://github.com/krystalgong/Persuasion_Index_Code/compare/v0.2.0rc5...HEAD
+[Unreleased]: https://github.com/krystalgong/Persuasion_Index_Code/compare/v0.2.0rc6...HEAD
+[0.2.0rc6]: https://github.com/krystalgong/Persuasion_Index_Code/compare/v0.2.0rc5...v0.2.0rc6
 [0.2.0rc5]: https://github.com/krystalgong/Persuasion_Index_Code/compare/v0.2.0rc4...v0.2.0rc5
 [0.2.0rc4]: https://github.com/krystalgong/Persuasion_Index_Code/compare/v0.2.0rc3...v0.2.0rc4
 [0.2.0rc3]: https://github.com/krystalgong/Persuasion_Index_Code/compare/v0.2.0rc2...v0.2.0rc3
