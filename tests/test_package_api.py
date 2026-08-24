@@ -100,6 +100,30 @@ class PublicApiTests(unittest.TestCase):
         json.loads(result.stdout)
         self.assertEqual(result.stderr, "")
 
+    def test_optional_warnings_link_resource_guide_once(self):
+        env = self._missing_resource_env()
+        env.pop("PI_QUIET_OPTIONAL_WARNINGS", None)
+
+        result = subprocess.run(
+            [
+                sys.executable,
+                "-m",
+                "persuasion_index.cli",
+                "--compact",
+                "This is urgent.",
+            ],
+            check=True,
+            capture_output=True,
+            text=True,
+            env=env,
+        )
+        json.loads(result.stdout)
+        resource_guide_url = (
+            "https://github.com/krystalgong/Persuasion_Index_Code/"
+            "blob/main/THIRD_PARTY_RESOURCES.md"
+        )
+        self.assertEqual(result.stderr.count(resource_guide_url), 1)
+
     def test_resource_doctor_json_reports_partial_configuration(self):
         result = subprocess.run(
             [

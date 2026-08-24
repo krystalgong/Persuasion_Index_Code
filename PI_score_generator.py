@@ -27,6 +27,11 @@ import csv
 # -----------------------------------------------------------------------------
 logger = logging.getLogger("PI_score_generator")
 
+THIRD_PARTY_RESOURCES_URL = (
+    "https://github.com/krystalgong/Persuasion_Index_Code/"
+    "blob/main/THIRD_PARTY_RESOURCES.md"
+)
+
 # -----------------------------------------------------------------------------
 # Robust paths (relative to this file, not cwd).
 # Allow override via PI_HELPER_DIR for flexible deployments.
@@ -47,10 +52,19 @@ def _env_flag(name: str) -> bool:
     return os.environ.get(name, "").strip().lower() in {"1", "true", "yes", "on"}
 
 
+@lru_cache(maxsize=1)
+def _show_optional_resource_guide() -> None:
+    logger.warning(
+        "Optional resource setup and download links: %s",
+        THIRD_PARTY_RESOURCES_URL,
+    )
+
+
 def _optional_warning(message: str, *args: Any) -> None:
     """Warn about an optional missing resource unless quiet mode is enabled."""
     if not _env_flag("PI_QUIET_OPTIONAL_WARNINGS"):
         logger.warning(message, *args)
+        _show_optional_resource_guide()
 
 
 def _resolve_local_path(path: str | Path, *, base: Path = BASE_DIR) -> Path:

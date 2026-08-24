@@ -111,7 +111,7 @@ Install the wheel into a fresh environment outside the checkout and run:
 import persuasion_index as pi
 
 scores = pi.score("According to the evidence, this action is urgent.")
-assert pi.__version__ == "0.2.0"
+assert pi.__version__ == "0.2.1"
 assert len(scores) == 15
 assert sum(len(dimension) - 1 for dimension in scores.values()) == 55
 ```
