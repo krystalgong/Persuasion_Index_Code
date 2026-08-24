@@ -30,7 +30,7 @@ python -m pip install numpy pandas wordfreq vaderSentiment
 python -m pip install \
   --index-url https://test.pypi.org/simple/ \
   --no-deps \
-  persuasion-index==0.2.0rc6
+  persuasion-index==0.2.0rc7
 ```
 
 In a Jupyter notebook, use `%pip` rather than `!pip` so installation targets

@@ -5,6 +5,15 @@ PEP 440 and semantic-versioning conventions.
 
 ## [Unreleased]
 
+## [0.2.0rc7] - 2026-08-23
+
+### Changed
+
+- Split the README quick start into a package-only path and an editable source
+  path for researchers who want to inspect or replace individual modules.
+- Separated installation commands from running examples and documented the
+  two-step TestPyPI installation needed to resolve dependencies from PyPI.
+
 ## [0.2.0rc6] - 2026-08-23
 
 ### Fixed
@@ -93,7 +102,8 @@ PEP 440 and semantic-versioning conventions.
 - Removed the unused `click` runtime dependency. The CLI continues to use the
   Python standard library's `argparse` module.
 
-[Unreleased]: https://github.com/krystalgong/Persuasion_Index_Code/compare/v0.2.0rc6...HEAD
+[Unreleased]: https://github.com/krystalgong/Persuasion_Index_Code/compare/v0.2.0rc7...HEAD
+[0.2.0rc7]: https://github.com/krystalgong/Persuasion_Index_Code/compare/v0.2.0rc6...v0.2.0rc7
 [0.2.0rc6]: https://github.com/krystalgong/Persuasion_Index_Code/compare/v0.2.0rc5...v0.2.0rc6
 [0.2.0rc5]: https://github.com/krystalgong/Persuasion_Index_Code/compare/v0.2.0rc4...v0.2.0rc5
 [0.2.0rc4]: https://github.com/krystalgong/Persuasion_Index_Code/compare/v0.2.0rc3...v0.2.0rc4
