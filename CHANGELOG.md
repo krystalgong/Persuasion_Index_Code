@@ -5,6 +5,14 @@ PEP 440 and semantic-versioning conventions.
 
 ## [Unreleased]
 
+## [0.2.1] - 2026-08-24
+
+### Changed
+
+- Added one link to the third-party resource guide when optional-resource
+  warnings first appear, without repeating the link for every missing resource
+  or subsequent scoring call.
+
 ## [0.2.0] - 2026-08-23
 
 ### Added
@@ -117,7 +125,8 @@ PEP 440 and semantic-versioning conventions.
 - Removed the unused `click` runtime dependency. The CLI continues to use the
   Python standard library's `argparse` module.
 
-[Unreleased]: https://github.com/krystalgong/Persuasion_Index_Code/compare/v0.2.0...HEAD
+[Unreleased]: https://github.com/krystalgong/Persuasion_Index_Code/compare/v0.2.1...HEAD
+[0.2.1]: https://github.com/krystalgong/Persuasion_Index_Code/compare/v0.2.0...v0.2.1
 [0.2.0]: https://github.com/krystalgong/Persuasion_Index_Code/compare/v0.2.0rc7...v0.2.0
 [0.2.0rc7]: https://github.com/krystalgong/Persuasion_Index_Code/compare/v0.2.0rc6...v0.2.0rc7
 [0.2.0rc6]: https://github.com/krystalgong/Persuasion_Index_Code/compare/v0.2.0rc5...v0.2.0rc6
