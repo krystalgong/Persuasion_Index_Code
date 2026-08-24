@@ -8,19 +8,38 @@ This repository accompanies **Persuasion Index: A Theory-Guided Framework for
 Persuasion Analysis**, accepted to the **EMNLP 2026 Main Conference**. The
 current paper is available on [arXiv](https://arxiv.org/abs/2606.14580).
 
-## TL;DR / Quick start
+## Quick start: choose how you want to use PI
 
-Clone the repository and install it in a virtual environment:
+Both options provide the same command-line and Python interfaces. Choose the
+first if you only want to run PI. Choose the second if you want to inspect or
+change how individual features are computed.
+
+### Option 1: install the package without cloning the repository
+
+This is the simplest route for analysis. The current release candidate is on
+TestPyPI, while its dependencies are on the regular PyPI. Install them in two
+steps so that each package comes from the intended index.
+
+#### Install
 
 ```bash
-git clone https://github.com/krystalgong/Persuasion_Index_Code.git
-cd Persuasion_Index_Code
 python3 -m venv .venv
 source .venv/bin/activate
-python -m pip install .
+python -m pip install --upgrade pip
+python -m pip install "numpy>=1.24" "pandas>=2.0" "wordfreq>=3.0" "vaderSentiment>=3.3.2"
+python -m pip install \
+  --index-url https://test.pypi.org/simple/ \
+  --no-deps \
+  persuasion-index==0.2.0rc7
 ```
 
-Then score a text from the command line:
+In a Jupyter notebook, use `%pip` in place of `python -m pip`, then restart the
+kernel. Once PI is released on the regular PyPI, the installation command will
+simply be `python -m pip install persuasion-index`.
+
+#### Run
+
+Score a text from the command line:
 
 ```bash
 persuasion-index \
@@ -38,9 +57,48 @@ scores = score(
 print(scores["Evidence"])
 ```
 
-That is enough to start. Scoring does not use a web service or require an API
-key. A few features can use additional linguistic resources; the base package
-still runs when those resources are absent.
+No repository checkout, web service, or API key is needed.
+
+### Option 2: clone the repository to inspect or change modules
+
+Use an editable install if you want to read the implementation, replace a
+feature detector, modify a lexicon, or contribute code.
+
+#### Install for development
+
+```bash
+git clone https://github.com/krystalgong/Persuasion_Index_Code.git
+cd Persuasion_Index_Code
+python3 -m venv .venv
+source .venv/bin/activate
+python -m pip install --upgrade pip
+python -m pip install -e ".[dev,notebooks]"
+```
+
+#### Run and modify
+
+Use the same `persuasion-index` command or Python API shown above. Because the
+installation is editable, saved source changes are used the next time the code
+runs; reinstalling the package is not necessary.
+
+The main places to start are:
+
+- `PI_score_generator.py` for individual feature implementations.
+- `persuasion_runner.py` for string, list, and DataFrame scoring.
+- `persuasion_index/api.py` for the public Python interface.
+- `helper_features/` for the bundled lexicons and stored coefficients.
+
+After a change, run the automated tests:
+
+```bash
+python -m pytest -q
+```
+
+See the [repository map](#repository-map) for the rest of the codebase.
+
+That is enough to start in either mode. A few features can use additional
+linguistic resources; the base package still runs when those resources are
+absent.
 
 For a complete first analysis—from checking resource coverage to exporting a
 DataFrame—see the [usage and analysis guide](https://github.com/krystalgong/Persuasion_Index_Code/blob/main/docs/analysis-guide.md).
@@ -65,24 +123,11 @@ still affect the means. Compare texts only when they were scored with the same
 PI version, lexicon choice, and resource configuration; the
 [usage guide](https://github.com/krystalgong/Persuasion_Index_Code/blob/main/docs/analysis-guide.md#3-understand-resource-coverage) explains this with examples.
 
-## Installation options
+## Installation notes
 
-PI supports Python 3.10 and newer. Python 3.11 or 3.12 is recommended.
-
-To install the latest GitHub version without cloning:
-
-```bash
-python -m pip install \
-  "git+https://github.com/krystalgong/Persuasion_Index_Code.git"
-```
-
-For notebook or package development, use an editable install:
-
-```bash
-python -m pip install -e ".[dev,notebooks]"
-```
-
-For the lexicon-expansion pipeline as well:
+PI supports Python 3.10 and newer. Python 3.11 or 3.12 is recommended. If you
+also plan to run the lexicon-expansion pipeline from a cloned repository,
+install its dependencies with:
 
 ```bash
 python -m pip install -e ".[lexicon,notebooks,dev]"
@@ -95,7 +140,7 @@ below add the remaining features:
 
 | Resource | Features it adds | Setup |
 |---|---|---|
-| spaCy `en_core_web_sm` | Named entities and organization mentions | Install the `spacy` extra, then run `python -m spacy download en_core_web_sm` |
+| spaCy `en_core_web_sm` | Named entities and organization mentions | Install spaCy, then run `python -m spacy download en_core_web_sm` |
 | Single-word concreteness ratings | `Specificity.lexical_concreteness` | Set `PI_CONCRETENESS_FILE` |
 | Multiword concreteness ratings | `Specificity.lexical_concreteness` | Set `PI_MWE_CONCRETENESS_FILE` |
 | LIWC-compatible dictionary | LIWC cues used by Specificity, Sentiment, and Engagement | Set `PI_LIWC_FILE` to a compatible, locally licensed `.dic` file |
@@ -104,13 +149,19 @@ below add the remaining features:
 Example configuration:
 
 ```bash
-python -m pip install ".[spacy,excel]"
+python -m pip install "spacy>=3.7" "openpyxl>=3.1"
 python -m spacy download en_core_web_sm
 
 export PI_CONCRETENESS_FILE=/absolute/path/to/concreteness_ratings.xlsx
 export PI_MWE_CONCRETENESS_FILE=/absolute/path/to/mwe_concreteness.csv
 export PI_LIWC_FILE=/absolute/path/to/LIWC.dic
 export PI_NRC_VAD_FILE=/absolute/path/to/nrc_vad.tsv
+```
+
+From an editable source checkout, install the corresponding extras with:
+
+```bash
+python -m pip install -e ".[spacy,excel]"
 ```
 
 Run the resource checker to see what is active and which features are affected:
