@@ -22,17 +22,6 @@ environments often contain compiled packages tied to a particular NumPy
 version, and upgrading only part of that stack can make unrelated packages
 fail to import.
 
-For the current TestPyPI release candidate, install dependencies from PyPI and
-PI itself from TestPyPI:
-
-```bash
-python -m pip install numpy pandas wordfreq vaderSentiment
-python -m pip install \
-  --index-url https://test.pypi.org/simple/ \
-  --no-deps \
-  persuasion-index==0.2.0rc7
-```
-
 In a Jupyter notebook, use `%pip` rather than `!pip` so installation targets
 the active kernel. Restart the kernel after installation if imports still
 resolve to an older environment.

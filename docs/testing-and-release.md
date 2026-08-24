@@ -111,7 +111,7 @@ Install the wheel into a fresh environment outside the checkout and run:
 import persuasion_index as pi
 
 scores = pi.score("According to the evidence, this action is urgent.")
-assert pi.__version__ == "0.2.0rc7"
+assert pi.__version__ == "0.2.0"
 assert len(scores) == 15
 assert sum(len(dimension) - 1 for dimension in scores.values()) == 55
 ```
@@ -135,8 +135,8 @@ This is the part that requires a human researcher rather than only CI.
 
 ## TestPyPI rehearsal
 
-Use the current release candidate, `0.2.0rc7`, for TestPyPI. Publish it there,
-then install dependencies from PyPI and the candidate itself from TestPyPI:
+The `0.2.0` release was rehearsed as `0.2.0rc7` on TestPyPI. For future release
+candidates, install dependencies from PyPI and PI itself from TestPyPI:
 
 ```bash
 python3 -m venv .venv-testpypi
