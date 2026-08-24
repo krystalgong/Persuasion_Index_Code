@@ -16,9 +16,8 @@ change how individual features are computed.
 
 ### Option 1: install the package without cloning the repository
 
-This is the simplest route for analysis. The current release candidate is on
-TestPyPI, while its dependencies are on the regular PyPI. Install them in two
-steps so that each package comes from the intended index.
+This is the simplest route for analysis. pip installs PI and its required
+dependencies from PyPI.
 
 #### Install
 
@@ -26,16 +25,11 @@ steps so that each package comes from the intended index.
 python3 -m venv .venv
 source .venv/bin/activate
 python -m pip install --upgrade pip
-python -m pip install "numpy>=1.24" "pandas>=2.0" "wordfreq>=3.0" "vaderSentiment>=3.3.2"
-python -m pip install \
-  --index-url https://test.pypi.org/simple/ \
-  --no-deps \
-  persuasion-index==0.2.0rc7
+python -m pip install persuasion-index
 ```
 
 In a Jupyter notebook, use `%pip` in place of `python -m pip`, then restart the
-kernel. Once PI is released on the regular PyPI, the installation command will
-simply be `python -m pip install persuasion-index`.
+kernel.
 
 #### Run
 

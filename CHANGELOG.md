@@ -5,6 +5,21 @@ PEP 440 and semantic-versioning conventions.
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-08-23
+
+### Added
+
+- Published the first public PyPI release of Persuasion Index, with 55
+  inspectable features grouped into 15 rhetorical dimensions.
+- Included single-text, batch, DataFrame, command-line, resource-diagnostic,
+  and UKP-weighted analysis interfaces.
+
+### Changed
+
+- Promoted `0.2.0rc7` to the final release without scoring changes.
+- Replaced the TestPyPI quick start with the standard
+  `python -m pip install persuasion-index` installation path.
+
 ## [0.2.0rc7] - 2026-08-23
 
 ### Changed
@@ -102,7 +117,8 @@ PEP 440 and semantic-versioning conventions.
 - Removed the unused `click` runtime dependency. The CLI continues to use the
   Python standard library's `argparse` module.
 
-[Unreleased]: https://github.com/krystalgong/Persuasion_Index_Code/compare/v0.2.0rc7...HEAD
+[Unreleased]: https://github.com/krystalgong/Persuasion_Index_Code/compare/v0.2.0...HEAD
+[0.2.0]: https://github.com/krystalgong/Persuasion_Index_Code/compare/v0.2.0rc7...v0.2.0
 [0.2.0rc7]: https://github.com/krystalgong/Persuasion_Index_Code/compare/v0.2.0rc6...v0.2.0rc7
 [0.2.0rc6]: https://github.com/krystalgong/Persuasion_Index_Code/compare/v0.2.0rc5...v0.2.0rc6
 [0.2.0rc5]: https://github.com/krystalgong/Persuasion_Index_Code/compare/v0.2.0rc4...v0.2.0rc5

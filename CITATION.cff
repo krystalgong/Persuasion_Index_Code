@@ -3,7 +3,7 @@ message: >-
   If you use Persuasion Index in academic work, please cite the paper below.
 title: Persuasion Index
 type: software
-version: 0.2.0rc7
+version: 0.2.0
 date-released: 2026-08-23
 license: Apache-2.0
 repository-code: https://github.com/krystalgong/Persuasion_Index_Code
