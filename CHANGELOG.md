@@ -5,6 +5,16 @@ PEP 440 and semantic-versioning conventions.
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-09-01
+
+### Changed
+
+- Promoted `0.3.0rc1` to the final release after TestPyPI acceptance testing of
+  installation, single-text and batch scoring, DataFrame input, the CLI,
+  optional-resource fallbacks, LIWC validation, and custom-lexicon isolation.
+- Kept the scoring formulas, output schema, and resource behavior unchanged
+  from `0.3.0rc1`.
+
 ## [0.3.0rc1] - 2026-09-01
 
 ### Fixed
@@ -155,7 +165,8 @@ PEP 440 and semantic-versioning conventions.
 - Removed the unused `click` runtime dependency. The CLI continues to use the
   Python standard library's `argparse` module.
 
-[Unreleased]: https://github.com/krystalgong/Persuasion_Index_Code/compare/v0.3.0rc1...HEAD
+[Unreleased]: https://github.com/krystalgong/Persuasion_Index_Code/compare/v0.3.0...HEAD
+[0.3.0]: https://github.com/krystalgong/Persuasion_Index_Code/compare/v0.3.0rc1...v0.3.0
 [0.3.0rc1]: https://github.com/krystalgong/Persuasion_Index_Code/compare/v0.2.1...v0.3.0rc1
 [0.2.1]: https://github.com/krystalgong/Persuasion_Index_Code/compare/v0.2.0...v0.2.1
 [0.2.0]: https://github.com/krystalgong/Persuasion_Index_Code/compare/v0.2.0rc7...v0.2.0

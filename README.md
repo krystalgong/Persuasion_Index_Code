@@ -127,9 +127,10 @@ install its dependencies with:
 python -m pip install -e ".[lexicon,notebooks,dev]"
 ```
 
-The current `0.3.0rc1` candidate has a separate
-[tester guide](https://github.com/krystalgong/Persuasion_Index_Code/blob/main/docs/0.3.0rc1-testing.md)
-with the exact TestPyPI installation and notebook acceptance checks.
+Version `0.3.0` was promoted from the tested `0.3.0rc1` package without
+additional scoring changes. The
+[acceptance checklist](https://github.com/krystalgong/Persuasion_Index_Code/blob/main/docs/0.3.0rc1-testing.md)
+records the TestPyPI installation and notebook checks used before release.
 
 ## Optional features
 
