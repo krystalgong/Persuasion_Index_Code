@@ -12,6 +12,11 @@ from typing import Any
 from zipfile import BadZipFile
 
 import PI_score_generator as _scorer
+from .liwc import (
+    LiwcParseError,
+    missing_required_categories,
+    parse_liwc_file,
+)
 
 
 OPTIONAL_RESOURCE_NAMES = (
@@ -247,6 +252,29 @@ def check_resources() -> dict[str, dict[str, Any]]:
             "convert or extract licensed data; use a supported licensed .dic "
             "or a future official LIWC CLI integration."
         )
+    elif liwc["available"]:
+        try:
+            parsed_liwc = parse_liwc_file(Path(str(liwc["path"])))
+        except LiwcParseError as exc:
+            liwc["available"] = False
+            liwc["detail"] = (
+                "The configured LIWC-compatible file could not be parsed: "
+                f"{exc}"
+            )
+        else:
+            missing_categories = missing_required_categories(parsed_liwc)
+            liwc["missing_categories"] = missing_categories
+            if missing_categories:
+                liwc["available"] = False
+                liwc["detail"] = (
+                    "The LIWC-compatible file is parseable but missing "
+                    "PI-used categories: " + ", ".join(missing_categories)
+                )
+            else:
+                liwc["detail"] = (
+                    "Licensed LIWC-compatible dictionary parsed successfully "
+                    "with all PI-used categories."
+                )
 
     nrc = _file_status(
         path=_resolve_path(

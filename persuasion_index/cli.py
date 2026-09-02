@@ -28,8 +28,15 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--lexicon",
         choices=("expanded", "seeded"),
-        default="expanded",
-        help="Lexicon set to use (default: expanded).",
+        default=None,
+        help=(
+            "Bundled lexicon set to use. By default PI_LEXICON_FILE is honored "
+            "when configured; otherwise expanded is used."
+        ),
+    )
+    parser.add_argument(
+        "--lexicon-file",
+        help="Path to a custom lexicon JSON file for this invocation.",
     )
     parser.add_argument(
         "--profile",
@@ -124,6 +131,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         raw, weighted = get_report(
             text,
             lexicon=args.lexicon,
+            lexicon_file=args.lexicon_file,
             strict_resources=args.strict_resources,
         )
         result = {"scores": raw, "weighted_profile": weighted}
@@ -133,6 +141,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         result = score(
             text,
             lexicon=args.lexicon,
+            lexicon_file=args.lexicon_file,
             strict_resources=args.strict_resources,
         )
 

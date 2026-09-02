@@ -17,10 +17,20 @@ import re
 import math
 import json
 import logging
+from collections import OrderedDict
+from contextlib import contextmanager
+from contextvars import ContextVar
 from pathlib import Path
 from functools import lru_cache
-from typing import Dict, Optional, Set, Any
+from threading import RLock
+from typing import Any, Dict, Iterator, Set
 import csv
+
+from persuasion_index.liwc import (
+    LiwcParseError,
+    missing_required_categories,
+    parse_liwc_file,
+)
 
 # -----------------------------------------------------------------------------
 # Logging to stderr only (never stdout).
@@ -139,9 +149,73 @@ def _optional_doc(nlp: Any, text: str):
 # Lexicon loading and cached regex compilation
 # -----------------------------------------------------------------------------
 
-# Update the cache size so it can store both the original and expanded versions if needed
-@lru_cache(maxsize=2)
-def _load_lexicons() -> Dict[str, Any]:
+_ACTIVE_LEXICON_PATH: ContextVar[str | None] = ContextVar(
+    "pi_active_lexicon_path",
+    default=None,
+)
+
+
+def _selected_lexicon_path(path: str | Path | None = None) -> Path:
+    """Resolve an explicit, context-local, environment, or seeded lexicon."""
+    configured = (
+        str(path)
+        if path is not None
+        else _ACTIVE_LEXICON_PATH.get() or _clean_env_value("PI_LEXICON_FILE")
+    )
+    selected = (
+        _resolve_local_path(configured)
+        if configured
+        else get_helper_dir() / "lexicons.json"
+    )
+    if configured and not selected.exists():
+        fallback = get_helper_dir() / Path(configured).name
+        if fallback.exists():
+            logger.warning(
+                "PI_LEXICON_FILE points to a missing file (%s). "
+                "Using bundled lexicon fallback: %s",
+                selected,
+                fallback,
+            )
+            selected = fallback
+    return selected.resolve()
+
+
+def _file_identity(path: Path) -> tuple[str, int, int]:
+    """Return a cache identity that changes when a local file is replaced."""
+    try:
+        stat = path.stat()
+        return (str(path.resolve()), stat.st_mtime_ns, stat.st_size)
+    except OSError:
+        return (str(path.resolve()), -1, -1)
+
+
+def _lexicon_identity(path: str | Path | None = None) -> tuple[str, int, int]:
+    return _file_identity(_selected_lexicon_path(path))
+
+
+@contextmanager
+def _using_lexicon(path: str | Path) -> Iterator[None]:
+    """Use one lexicon for this thread/task without mutating process state."""
+    token = _ACTIVE_LEXICON_PATH.set(str(_selected_lexicon_path(path)))
+    try:
+        yield
+    finally:
+        _ACTIVE_LEXICON_PATH.reset(token)
+
+
+def _select_lexicon_for_context(path: str | Path) -> str:
+    """Persist a lexicon selection in only the current execution context."""
+    selected = _selected_lexicon_path(path)
+    _ACTIVE_LEXICON_PATH.set(str(selected))
+    return str(selected)
+
+
+@lru_cache(maxsize=16)
+def _load_lexicons_cached(
+    path_string: str,
+    _mtime_ns: int,
+    _size: int,
+) -> Dict[str, Any]:
     """
     Load the selected lexicon and normalize:
       - list -> set
@@ -153,18 +227,7 @@ def _load_lexicons() -> Dict[str, Any]:
     values are loaded as provided.
     """
     helper_dir = get_helper_dir()
-    filename = _clean_env_value("PI_LEXICON_FILE")
-    path = _resolve_local_path(filename) if filename else helper_dir / "lexicons.json"
-    if filename and not path.exists():
-        fallback = helper_dir / Path(filename).name
-        if fallback.exists():
-            logger.warning(
-                "PI_LEXICON_FILE points to a missing file (%s). "
-                "Using bundled lexicon fallback: %s",
-                path,
-                fallback,
-            )
-            path = fallback
+    path = Path(path_string)
     logger.info("Loading lexicons from: %s", path)
     with path.open("r", encoding="utf-8") as f:
         data = json.load(f)
@@ -192,6 +255,14 @@ def _load_lexicons() -> Dict[str, Any]:
     return norm
 
 
+def _load_lexicons(path: str | Path | None = None) -> Dict[str, Any]:
+    identity = _lexicon_identity(path)
+    return _load_lexicons_cached(*identity)
+
+
+_load_lexicons.cache_clear = _load_lexicons_cached.cache_clear  # type: ignore[attr-defined]
+
+
 def _merge_lexicon_data(base: Any, expanded: Any) -> Any:
     """Recursively overlay expanded data while retaining all seed entries."""
     if isinstance(base, dict) and isinstance(expanded, dict):
@@ -209,7 +280,12 @@ def _merge_lexicon_data(base: Any, expanded: Any) -> Any:
 
     return expanded
 
-_PATTERN_CACHE: Dict[str, re.Pattern] = {}
+_PATTERN_CACHE_MAXSIZE = 512
+_PATTERN_CACHE: OrderedDict[
+    tuple[tuple[str, int, int], str],
+    re.Pattern,
+] = OrderedDict()
+_PATTERN_CACHE_LOCK = RLock()
 
 def _compile_vocab_pattern(vocab: Set[str]) -> re.Pattern:
     """
@@ -241,10 +317,16 @@ def _vocab_spans(
     vocab: Set[str],
 ) -> list[tuple[int, int]]:
     """Return boundary-aware, non-contained lexicon match spans."""
-    pat = _PATTERN_CACHE.get(cache_key)
-    if pat is None:
-        pat = _compile_vocab_pattern(vocab)
-        _PATTERN_CACHE[cache_key] = pat
+    namespaced_key = (_lexicon_identity(), cache_key)
+    with _PATTERN_CACHE_LOCK:
+        pat = _PATTERN_CACHE.get(namespaced_key)
+        if pat is None:
+            pat = _compile_vocab_pattern(vocab)
+            _PATTERN_CACHE[namespaced_key] = pat
+            if len(_PATTERN_CACHE) > _PATTERN_CACHE_MAXSIZE:
+                _PATTERN_CACHE.popitem(last=False)
+        else:
+            _PATTERN_CACHE.move_to_end(namespaced_key)
 
     # Collect all match spans, then remove any span fully contained within a longer match.
     # e.g. "besides" is absorbed by "besides that" — only the longer match counts.
@@ -269,7 +351,11 @@ def _count_lex(text: str, lex_key: str) -> int:
 # Regexes
 # -----------------------------------------------------------------------------
 RE_NUMBER = re.compile(r"\b\d[\d,.\%]*\b")
-RE_PERCENT = re.compile(r"\b\d+%\b|\b\d+\spercent\b", re.IGNORECASE)
+RE_PERCENT = re.compile(
+    r"(?<!\w)\d+(?:[.,]\d+)*\s*%(?!\w)"
+    r"|\b\d+(?:[.,]\d+)*\s+percent\b",
+    re.IGNORECASE,
+)
 RE_URL = re.compile(r"https?://\S+|\bwww\.\S+", re.IGNORECASE)
 RE_APA = re.compile(r"\b[A-Z][a-z]+(?:\s[A-Z][a-z]+)?\s*\(\d{4}\)")
 RE_NUM_CIT = re.compile(r"\[(?:\d{1,3}(?:,\s*\d{1,3})*)\]")
@@ -376,9 +462,25 @@ RE_SOFT_ACK = re.compile(
 # LIWC: cached loading + cached regex compilation
 # -----------------------------------------------------------------------------
 
-@lru_cache(maxsize=1)
-def _load_liwc_dic() -> Dict[str, list]:
-    path = _resource_path("PI_LIWC_FILE", "en_liwc.txt")
+def _liwc_path(path: str | Path | None = None) -> Path:
+    return (
+        _resolve_local_path(path)
+        if path is not None
+        else _resource_path("PI_LIWC_FILE", "en_liwc.txt")
+    ).resolve()
+
+
+def _liwc_identity(path: str | Path | None = None) -> tuple[str, int, int]:
+    return _file_identity(_liwc_path(path))
+
+
+@lru_cache(maxsize=16)
+def _load_liwc_dic_cached(
+    path_string: str,
+    _mtime_ns: int,
+    _size: int,
+) -> Dict[str, list[str]]:
+    path = Path(path_string)
     dic: Dict[str, list] = {}
     if not path.exists():
         _optional_warning(
@@ -389,50 +491,39 @@ def _load_liwc_dic() -> Dict[str, list]:
         return dic
 
     try:
-        lines = path.read_text(encoding="utf-8-sig", errors="ignore").splitlines()
-        percent_lines = [i for i, line in enumerate(lines) if line.strip() == "%"]
-
-        # Standard LIWC .dic format: category table between two '%' lines,
-        # followed by word/pattern rows keyed by numeric category identifiers.
-        if len(percent_lines) >= 2:
-            category_names: Dict[str, str] = {}
-            for line in lines[percent_lines[0] + 1:percent_lines[1]]:
-                parts = line.strip().split()
-                if len(parts) >= 2:
-                    category_names[parts[0]] = parts[1]
-                    dic.setdefault(parts[1], [])
-
-            for line in lines[percent_lines[1] + 1:]:
-                parts = line.strip().split()
-                if len(parts) < 2:
-                    continue
-                term = parts[0]
-                for category_id in parts[1:]:
-                    category_name = category_names.get(category_id)
-                    if category_name:
-                        dic[category_name].append(term)
-            return dic
-
-        # Compact project-compatible format: Category: term1 term2 term3
-        for line in lines:
-            line = line.strip()
-            if not line or line.startswith("#") or ":" not in line:
-                continue
-            key, rest = line.split(":", 1)
-            dic[key.strip()] = [token for token in rest.split() if token]
-    except Exception as e:
-        logger.warning(
-            "Could not read LIWC-compatible dictionary at %s. "
+        dic = parse_liwc_file(path)
+    except LiwcParseError as e:
+        _optional_warning(
+            "Could not parse LIWC-compatible dictionary at %s. "
             "LIWC-derived cues will be unavailable. Error: %s",
             path,
             e,
         )
+        return {}
+
+    missing = missing_required_categories(dic)
+    if missing:
+        _optional_warning(
+            "LIWC-compatible dictionary at %s is missing PI-used categories: "
+            "%s. Their dependent features will be 0.0.",
+            path,
+            ", ".join(missing),
+        )
     return dic
 
-_LIWC_REGEX_CACHE: Dict[str, re.Pattern] = {}
 
-def _compile_liwc_regex(category_name: str) -> re.Pattern:
-    dic = _load_liwc_dic()
+def _load_liwc_dic(path: str | Path | None = None) -> Dict[str, list[str]]:
+    return _load_liwc_dic_cached(*_liwc_identity(path))
+
+
+@lru_cache(maxsize=256)
+def _compile_liwc_regex_cached(
+    path_string: str,
+    mtime_ns: int,
+    size: int,
+    category_name: str,
+) -> re.Pattern:
+    dic = _load_liwc_dic_cached(path_string, mtime_ns, size)
     patterns = dic.get(category_name, [])
     if not patterns:
         return re.compile(r"$.")
@@ -457,12 +548,17 @@ def _compile_liwc_regex(category_name: str) -> re.Pattern:
         logger.warning("Failed to compile LIWC regex for category '%s'.", category_name)
         return re.compile(r"$.")
 
+
 def _liwc_re(category: str) -> re.Pattern:
-    pat = _LIWC_REGEX_CACHE.get(category)
-    if pat is None:
-        pat = _compile_liwc_regex(category)
-        _LIWC_REGEX_CACHE[category] = pat
-    return pat
+    return _compile_liwc_regex_cached(*_liwc_identity(), category)
+
+
+def _clear_liwc_caches() -> None:
+    _load_liwc_dic_cached.cache_clear()
+    _compile_liwc_regex_cached.cache_clear()
+
+
+_load_liwc_dic.cache_clear = _clear_liwc_caches  # type: ignore[attr-defined]
 
 # =========================================================
 # Lazy spaCy + VADER loaders (cached per process)
@@ -670,10 +766,23 @@ def _load_nrc_vad(path: str | Path | None = None):
 # =========================================================
 
 def evidence_statistical(text: str) -> float:
-    num_cnt = len(RE_NUMBER.findall(text))
-    per_cnt = len(RE_PERCENT.findall(text))
+    quantitative_spans = [
+        match.span()
+        for pattern in (RE_NUMBER, RE_PERCENT)
+        for match in pattern.finditer(text)
+    ]
+    non_contained_spans = {
+        (start, end)
+        for start, end in quantitative_spans
+        if not any(
+            other_start <= start
+            and end <= other_end
+            and (other_start, other_end) != (start, end)
+            for other_start, other_end in quantitative_spans
+        )
+    }
     unit_cnt = _count_lex(text, "EVI_UNITS")
-    return _density(num_cnt + per_cnt + unit_cnt, _tok_count(text))
+    return _density(len(non_contained_spans) + unit_cnt, _tok_count(text))
 
 def evidence_attribution(text: str) -> float:
     c = len(RE_APA.findall(text)) + len(RE_NUM_CIT.findall(text)) + len(RE_URL.findall(text))
@@ -1351,7 +1460,7 @@ def score_all(text: str) -> Dict[str, Dict[str, float]]:
     Return nested scores per category.
     Heavy resources are loaded lazily and cached per worker process.
     """
-    text = re.sub(r"\s+", " ", text.lower()).strip()
+    text = re.sub(r"\s+", " ", text).strip()
     if not re.search(r"\w", text, flags=re.UNICODE):
         return _empty_scores()
 

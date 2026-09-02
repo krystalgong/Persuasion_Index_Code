@@ -122,6 +122,20 @@ expanded_scores = score(text, lexicon="expanded")
 Record the selected lexicon in papers and analysis artifacts. The expanded,
 audited lexicons are the default.
 
+For a custom project lexicon, pass the file for that scoring call:
+
+```python
+custom_scores = score(
+    text,
+    lexicon_file="/absolute/path/to/custom.json",
+)
+```
+
+Alternatively, set `PI_LEXICON_FILE` before scoring and omit both `lexicon`
+and `lexicon_file`. Explicit arguments take precedence. PI does not rewrite
+the environment variable, and different lexicon files can be used safely by
+concurrent scoring calls.
+
 ## 4. Analyze a list of texts
 
 ```python

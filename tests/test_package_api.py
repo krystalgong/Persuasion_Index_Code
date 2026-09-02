@@ -3,7 +3,9 @@ import os
 import subprocess
 import sys
 import tempfile
+import threading
 import unittest
+from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 from unittest.mock import patch
 
@@ -11,11 +13,13 @@ import pandas as pd
 
 import persuasion_index
 from PI_score_generator import (
+    RE_PERCENT,
     _load_concreteness_dic,
     _load_liwc_dic,
     _load_lexicons,
     _load_mwe_concreteness_dic,
     _load_nrc_vad,
+    score_all,
 )
 from persuasion_runner import run_expanded_lexicons
 
@@ -255,6 +259,200 @@ class PublicApiTests(unittest.TestCase):
                 status["detail"].startswith("Could not read Excel resource header:")
                 or "openpyxl is not installed" in status["detail"]
             )
+
+    def test_score_preserves_case_for_case_sensitive_features(self):
+        seen_texts: list[str] = []
+
+        class FakeDoc(list):
+            ents: list = []
+
+        def fake_nlp(text: str):
+            seen_texts.append(text)
+            return FakeDoc()
+
+        with patch("PI_score_generator._get_nlp", return_value=fake_nlp):
+            scores = score_all("Smith (2020) says the plan is GREAT.")
+
+        self.assertTrue(seen_texts)
+        self.assertTrue(
+            all(
+                text == "Smith (2020) says the plan is GREAT."
+                for text in seen_texts
+            )
+        )
+        self.assertEqual(scores["Evidence"]["attribution"], 1.0)
+
+        cased = persuasion_index.score(
+            "The plan is GREAT and the results are good."
+        )
+        lowered = persuasion_index.score(
+            "the plan is great and the results are good."
+        )
+        self.assertGreater(
+            cased["Sentiment"]["vader_compound"],
+            lowered["Sentiment"]["vader_compound"],
+        )
+
+    def test_percent_regex_matches_normal_percent_expressions(self):
+        for text in ("20%", "20% of adults", "fell 20%.", "3.5%", "20 percent"):
+            with self.subTest(text=text):
+                self.assertTrue(RE_PERCENT.search(text))
+
+        for text in ("20%rate", "abc20%"):
+            with self.subTest(text=text):
+                self.assertIsNone(RE_PERCENT.search(text))
+
+    def test_liwc_configuration_refreshes_after_first_score(self):
+        with tempfile.TemporaryDirectory() as temp_dir:
+            liwc_file = Path(temp_dir) / "dynamic-liwc.dic"
+            env = {
+                "PI_LIWC_FILE": str(liwc_file),
+                "PI_QUIET_OPTIONAL_WARNINGS": "1",
+            }
+            with patch.dict(os.environ, env, clear=False):
+                before = persuasion_index.score("furious")
+                self.assertEqual(before["Sentiment"]["anger"], 0.0)
+
+                liwc_file.write_text("Anger: furious\n", encoding="utf-8")
+                after = persuasion_index.score("furious")
+                self.assertGreater(after["Sentiment"]["anger"], 0.0)
+
+                liwc_file.write_text("Anger: calm\n", encoding="utf-8")
+                replaced = persuasion_index.score("furious")
+                self.assertEqual(replaced["Sentiment"]["anger"], 0.0)
+
+    def test_doctor_rejects_unparseable_and_partial_liwc(self):
+        with tempfile.TemporaryDirectory() as temp_dir:
+            liwc_file = Path(temp_dir) / "invalid-liwc.dic"
+            liwc_file.write_text(
+                "this is not a LIWC dictionary at all",
+                encoding="utf-8",
+            )
+            with patch.dict(
+                os.environ,
+                {"PI_LIWC_FILE": str(liwc_file)},
+                clear=False,
+            ):
+                invalid = persuasion_index.check_resources()["liwc"]
+            self.assertFalse(invalid["available"])
+            self.assertIn("could not be parsed", invalid["detail"])
+
+            liwc_file.write_text("Anger: furious\n", encoding="utf-8")
+            with patch.dict(
+                os.environ,
+                {"PI_LIWC_FILE": str(liwc_file)},
+                clear=False,
+            ):
+                partial = persuasion_index.check_resources()["liwc"]
+            self.assertFalse(partial["available"])
+            self.assertIn("missing PI-used categories", partial["detail"])
+            self.assertIn("You", partial["missing_categories"])
+
+            liwc_file.write_text(
+                "I: me\n"
+                "You: you\n"
+                "Anger: furious\n"
+                "Sad: sad\n"
+                "Anx: worried\n"
+                "Posemo: happy\n"
+                "Past: was\n"
+                "See: see\n"
+                "Ppron: they\n",
+                encoding="utf-8",
+            )
+            with patch.dict(
+                os.environ,
+                {"PI_LIWC_FILE": str(liwc_file)},
+                clear=False,
+            ):
+                valid = persuasion_index.check_resources()["liwc"]
+            self.assertTrue(valid["available"])
+            self.assertEqual(valid["missing_categories"], [])
+
+    def test_public_api_honors_custom_lexicon_without_overwriting_env(self):
+        with tempfile.TemporaryDirectory() as temp_dir:
+            lexicon_file = Path(temp_dir) / "custom.json"
+            lexicon_file.write_text(
+                json.dumps({"ARG_CLAIM": ["zorb"]}),
+                encoding="utf-8",
+            )
+            with patch.dict(
+                os.environ,
+                {"PI_LEXICON_FILE": str(lexicon_file)},
+                clear=False,
+            ):
+                custom = persuasion_index.score("zorb")
+                explicit_bundled = persuasion_index.score(
+                    "zorb",
+                    lexicon="expanded",
+                )
+                self.assertEqual(
+                    os.environ["PI_LEXICON_FILE"],
+                    str(lexicon_file),
+                )
+
+            self.assertGreater(
+                custom["Argumentation"]["conclusion_explicitness"],
+                0.0,
+            )
+            self.assertEqual(
+                explicit_bundled["Argumentation"]["conclusion_explicitness"],
+                0.0,
+            )
+
+            cli = subprocess.run(
+                [
+                    sys.executable,
+                    "-m",
+                    "persuasion_index.cli",
+                    "--compact",
+                    "--lexicon-file",
+                    str(lexicon_file),
+                    "zorb",
+                ],
+                check=True,
+                capture_output=True,
+                text=True,
+                env={**os.environ, "PI_QUIET_OPTIONAL_WARNINGS": "1"},
+            )
+            cli_scores = json.loads(cli.stdout)
+            self.assertGreater(
+                cli_scores["Argumentation"]["conclusion_explicitness"],
+                0.0,
+            )
+
+    def test_concurrent_custom_lexicons_do_not_contaminate_each_other(self):
+        with tempfile.TemporaryDirectory() as temp_dir:
+            matching = Path(temp_dir) / "matching.json"
+            missing = Path(temp_dir) / "missing.json"
+            matching.write_text(
+                json.dumps({"ARG_CLAIM": ["alpha"]}),
+                encoding="utf-8",
+            )
+            missing.write_text(
+                json.dumps({"ARG_CLAIM": ["beta"]}),
+                encoding="utf-8",
+            )
+            barrier = threading.Barrier(2)
+
+            def score_repeatedly(path: Path) -> list[float]:
+                barrier.wait()
+                return [
+                    persuasion_index.score(
+                        "alpha",
+                        lexicon_file=path,
+                    )["Argumentation"]["conclusion_explicitness"]
+                    for _ in range(50)
+                ]
+
+            with ThreadPoolExecutor(max_workers=2) as executor:
+                matching_future = executor.submit(score_repeatedly, matching)
+                missing_future = executor.submit(score_repeatedly, missing)
+                matching_scores = matching_future.result()
+                missing_scores = missing_future.result()
+
+            self.assertTrue(all(value > 0.0 for value in matching_scores))
+            self.assertTrue(all(value == 0.0 for value in missing_scores))
 
     def test_cli_version_matches_package_version(self):
         result = subprocess.run(

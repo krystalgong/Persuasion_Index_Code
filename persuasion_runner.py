@@ -13,18 +13,25 @@ from __future__ import annotations
 
 import os
 from collections.abc import Sequence
+from pathlib import Path
 from typing import Any, Literal
 
 import pandas as pd
 
-from PI_score_generator import _PATTERN_CACHE, _load_lexicons, get_helper_dir, score_all
+from PI_score_generator import (
+    _select_lexicon_for_context,
+    _selected_lexicon_path,
+    _using_lexicon,
+    get_helper_dir,
+    score_all,
+)
 
 LexiconChoice = Literal["expanded", "seeded"]
 OutputChoice = Literal["auto", "raw", "matrices", "both"]
 
 
 def _use_expanded_from_choice(
-    lexicon: LexiconChoice | bool = "expanded",
+    lexicon: LexiconChoice | bool | None = None,
     use_expanded_lexicons: bool | None = None,
 ) -> bool:
     if use_expanded_lexicons is not None:
@@ -32,6 +39,9 @@ def _use_expanded_from_choice(
 
     if isinstance(lexicon, bool):
         return lexicon
+
+    if lexicon is None:
+        return True
 
     normalized = lexicon.strip().lower()
     if normalized in {"expanded", "expand", "llm", "audited"}:
@@ -42,24 +52,52 @@ def _use_expanded_from_choice(
     raise ValueError("lexicon must be 'expanded' or 'seeded'")
 
 
+def _bundled_lexicon_path(use_expanded_lexicons: bool) -> Path:
+    filename = (
+        "lexicons_expanded_LLM_audited.json"
+        if use_expanded_lexicons
+        else "lexicons.json"
+    )
+    return (get_helper_dir() / filename).resolve()
+
+
+def _resolve_scoring_lexicon(
+    *,
+    lexicon: LexiconChoice | bool | None = None,
+    lexicon_file: str | Path | None = None,
+    use_expanded_lexicons: bool | None = None,
+) -> Path:
+    """Resolve one immutable lexicon choice for a scoring operation."""
+    if lexicon_file is not None:
+        if lexicon is not None or use_expanded_lexicons is not None:
+            raise ValueError(
+                "lexicon_file cannot be combined with lexicon or "
+                "use_expanded_lexicons"
+            )
+        return _selected_lexicon_path(lexicon_file)
+
+    if use_expanded_lexicons is not None or lexicon is not None:
+        return _bundled_lexicon_path(
+            _use_expanded_from_choice(lexicon, use_expanded_lexicons)
+        )
+
+    configured = os.environ.get("PI_LEXICON_FILE", "").strip()
+    if configured:
+        return _selected_lexicon_path(configured)
+
+    return _bundled_lexicon_path(True)
+
+
 def run_expanded_lexicons(
     use_expanded_lexicons: bool = True,
 ) -> str:
     """
-    Select the expanded or seeded lexicon file and clear scorer caches.
+    Select the expanded or seeded lexicon in the current thread/task context.
 
     Returns the lexicon path that was selected.
     """
-    helper_dir = get_helper_dir()
-    filename = (
-        helper_dir / "lexicons_expanded_LLM_audited.json"
-        if use_expanded_lexicons
-        else helper_dir / "lexicons.json"
-    )
-    os.environ["PI_LEXICON_FILE"] = str(filename)
-    _load_lexicons.cache_clear()
-    _PATTERN_CACHE.clear()
-    return str(filename)
+    filename = _bundled_lexicon_path(use_expanded_lexicons)
+    return _select_lexicon_for_context(filename)
 
 
 def _as_text_frame(
@@ -106,7 +144,10 @@ def _flatten_scores(scores: dict[str, Any]) -> tuple[dict[str, float], dict[str,
 def build_score_matrices(
     data: str | Sequence[str] | pd.DataFrame,
     text_col: str = "argument",
-    use_expanded_lexicons: bool = True,
+    use_expanded_lexicons: bool | None = None,
+    *,
+    lexicon: LexiconChoice | bool | None = None,
+    lexicon_file: str | Path | None = None,
 ) -> tuple[pd.DataFrame, pd.DataFrame]:
     """
     Run `score_all` and return two DataFrames:
@@ -116,16 +157,21 @@ def build_score_matrices(
     `data` can be a single text string, a sequence of text strings, or a
     DataFrame containing `text_col`.
     """
-    run_expanded_lexicons(use_expanded_lexicons)
+    selected_lexicon = _resolve_scoring_lexicon(
+        lexicon=lexicon,
+        lexicon_file=lexicon_file,
+        use_expanded_lexicons=use_expanded_lexicons,
+    )
     df, _ = _as_text_frame(data, text_col=text_col)
 
     rows_sub = []
     rows_mean = []
-    for text in df[text_col].fillna(""):
-        scores = score_all(str(text))
-        flat_sub, flat_mean = _flatten_scores(scores)
-        rows_sub.append(flat_sub)
-        rows_mean.append(flat_mean)
+    with _using_lexicon(selected_lexicon):
+        for text in df[text_col].fillna(""):
+            scores = score_all(str(text))
+            flat_sub, flat_mean = _flatten_scores(scores)
+            rows_sub.append(flat_sub)
+            rows_mean.append(flat_mean)
 
     df_subfeatures = (
         pd.DataFrame(rows_sub, index=df.index)
@@ -144,9 +190,10 @@ def build_score_matrices(
 def score_persuasion(
     data: str | Sequence[str] | pd.DataFrame,
     text_col: str = "argument",
-    lexicon: LexiconChoice | bool = "expanded",
+    lexicon: LexiconChoice | bool | None = None,
     output: OutputChoice = "auto",
     use_expanded_lexicons: bool | None = None,
+    lexicon_file: str | Path | None = None,
 ) -> Any:
     """
     Overall convenience function for single texts and DataFrames.
@@ -161,15 +208,16 @@ def score_persuasion(
     - `output="matrices"` always returns `(df_subfeatures, df_means)`
     - `output="both"` returns raw scores plus matrices
     """
-    use_expanded = _use_expanded_from_choice(
+    selected_lexicon = _resolve_scoring_lexicon(
         lexicon=lexicon,
+        lexicon_file=lexicon_file,
         use_expanded_lexicons=use_expanded_lexicons,
     )
-    run_expanded_lexicons(use_expanded)
 
     df, is_single_text = _as_text_frame(data, text_col=text_col)
 
-    raw_scores = [score_all(str(text)) for text in df[text_col].fillna("")]
+    with _using_lexicon(selected_lexicon):
+        raw_scores = [score_all(str(text)) for text in df[text_col].fillna("")]
 
     if output == "raw":
         return raw_scores[0] if is_single_text else raw_scores

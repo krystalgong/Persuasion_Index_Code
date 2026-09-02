@@ -1,10 +1,11 @@
 from pathlib import Path
+from typing import Literal
 
 import numpy as np
 import pandas as pd
 
-from PI_score_generator import get_helper_dir, score_all
-from persuasion_runner import run_expanded_lexicons
+from PI_score_generator import get_helper_dir
+from persuasion_runner import score_persuasion
 
 
 def calculate_dual_weighted_score(raw_scores: dict, sub_ci_df: pd.DataFrame, mean_ci_df: pd.DataFrame) -> dict:
@@ -61,7 +62,10 @@ def calculate_dual_weighted_score(raw_scores: dict, sub_ci_df: pd.DataFrame, mea
 
 def get_persuasion_report(
     text: str,
-    use_expanded_lexicons: bool = True,
+    use_expanded_lexicons: bool | None = None,
+    *,
+    lexicon: Literal["expanded", "seeded"] | None = None,
+    lexicon_file: str | Path | None = None,
 ) -> tuple:
     """
     Returns two objects:
@@ -73,10 +77,14 @@ def get_persuasion_report(
     sub_path = helper_dir / "regression_outputs" / "ci_ukp_subfeatures.csv"
     mean_path = helper_dir / "regression_outputs" / "ci_ukp_mean.csv"
 
-    run_expanded_lexicons(use_expanded_lexicons)
-    
     # 2. Extract Baseline Features
-    raw_scores = score_all(text)
+    raw_scores = score_persuasion(
+        text,
+        lexicon=lexicon,
+        lexicon_file=lexicon_file,
+        use_expanded_lexicons=use_expanded_lexicons,
+        output="raw",
+    )
     
     # 3. Check for stored CI files
     if not Path(sub_path).exists() or not Path(mean_path).exists():
