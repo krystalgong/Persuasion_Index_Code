@@ -127,6 +127,10 @@ install its dependencies with:
 python -m pip install -e ".[lexicon,notebooks,dev]"
 ```
 
+The current `0.3.0rc1` candidate has a separate
+[tester guide](https://github.com/krystalgong/Persuasion_Index_Code/blob/main/docs/0.3.0rc1-testing.md)
+with the exact TestPyPI installation and notebook acceptance checks.
+
 ## Optional features
 
 The bundled lexicons and lightweight detectors work immediately. The resources
@@ -231,6 +235,23 @@ The expanded, audited lexicons are used by default. For comparisons with the
 original seed lexicons, pass `lexicon="seeded"` to `score`, `score_batch`, or
 `get_report`.
 
+To use a custom lexicon for one call, pass its path explicitly:
+
+```python
+custom_scores = score(text, lexicon_file="/absolute/path/to/custom.json")
+```
+
+The CLI equivalent is:
+
+```bash
+persuasion-index --lexicon-file /path/to/custom.json "Text to score"
+```
+
+If neither `lexicon_file` nor `lexicon` is passed, PI honors `PI_LEXICON_FILE`
+when it is set and otherwise uses the expanded lexicon. Explicit arguments take
+precedence and PI does not rewrite the environment variable. Lexicon choices
+are isolated across concurrent scoring calls.
+
 For more examples, output details, and a reproducibility checklist, see the
 [analysis guide](https://github.com/krystalgong/Persuasion_Index_Code/blob/main/docs/analysis-guide.md).
 
@@ -267,6 +288,12 @@ Here, `r` is the match rate per 100 tokens. Sparse signals use binary
 presence/absence scores. When lexicon matches overlap, PI keeps the longest
 non-contained span. A dimension score is the unweighted mean of its
 subfeatures.
+
+PI preserves input capitalization for case-sensitive components such as
+APA-style citations, spaCy NER, and VADER emphasis. Case-insensitive lexical
+features normalize text inside their own detector. Overlapping number and
+percentage matches, such as the `20` inside `20%`, count as one quantitative
+expression.
 
 PI measures rhetorical cues rather than whether a claim is true or whether a
 particular audience will ultimately be persuaded. For example, Evidence finds

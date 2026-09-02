@@ -42,6 +42,12 @@ PI does not automatically download any of these resources or accept a license
 on a user's behalf. `persuasion-index doctor` reports official source links and
 local configuration without copying the underlying data.
 
+For LIWC, `doctor` parses the configured file and verifies that the categories
+used by PI are present. A file that merely exists, cannot be parsed, or contains
+only part of the required category set is not reported as complete and fails
+`doctor --strict`. The scorer can detect a newly configured or replaced LIWC
+file in the same Python process; restarting a notebook kernel is not required.
+
 The current LIWC loader supports a legally obtained legacy `.dic` file. It does
 not support LIWC-22 `.dicx`. Users must not convert, extract, or share LIWC data
 in violation of their license. A future LIWC-22 integration should use the

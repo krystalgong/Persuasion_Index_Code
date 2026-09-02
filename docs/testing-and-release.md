@@ -111,7 +111,7 @@ Install the wheel into a fresh environment outside the checkout and run:
 import persuasion_index as pi
 
 scores = pi.score("According to the evidence, this action is urgent.")
-assert pi.__version__ == "0.2.1"
+assert pi.__version__ == "0.3.0rc1"
 assert len(scores) == 15
 assert sum(len(dimension) - 1 for dimension in scores.values()) == 55
 ```
@@ -135,8 +135,8 @@ This is the part that requires a human researcher rather than only CI.
 
 ## TestPyPI rehearsal
 
-The `0.2.0` release was rehearsed as `0.2.0rc7` on TestPyPI. For future release
-candidates, install dependencies from PyPI and PI itself from TestPyPI:
+Use the current release candidate, `0.3.0rc1`, for TestPyPI. Install
+dependencies from PyPI and PI itself from TestPyPI:
 
 ```bash
 python3 -m venv .venv-testpypi
@@ -145,7 +145,7 @@ python -m pip install numpy pandas wordfreq vaderSentiment
 python -m pip install \
   --index-url https://test.pypi.org/simple/ \
   --no-deps \
-  persuasion-index==0.2.0rc7
+  persuasion-index==0.3.0rc1
 ```
 
 Run the distribution smoke test from a directory that is not the source
@@ -166,7 +166,7 @@ token in repository secrets.
 5. A release workflow builds the source distribution and wheel once, runs
    artifact checks, and uploads those same artifacts.
 6. Tags ending in `rcN` publish only to TestPyPI.
-7. A final tag such as `v0.2.0` publishes to PyPI after environment approval.
+7. A final tag such as `v0.3.0` publishes to PyPI after environment approval.
 8. Create a GitHub Release from the same tag and copy the matching changelog
    section into its release notes.
 9. Install the published PyPI version in a clean environment and rerun the smoke
@@ -184,6 +184,7 @@ Persuasion Index uses PEP 440-compatible semantic versions:
 | `0.2.0rcN` | Release candidates for TestPyPI and researcher testing |
 | `0.2.0` | Final feature release |
 | `0.2.1` | Backward-compatible bug or packaging fix |
+| `0.3.0rcN` | Candidates for the case, resource, and lexicon-state fixes |
 | `0.3.0` | New features or intentional scoring changes before 1.0 |
 | `1.0.0` | First stable scoring and output contract |
 | `2.0.0` | Breaking API, feature-name, or result-schema change after 1.0 |

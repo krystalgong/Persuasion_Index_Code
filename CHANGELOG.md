@@ -5,6 +5,36 @@ PEP 440 and semantic-versioning conventions.
 
 ## [Unreleased]
 
+## [0.3.0rc1] - 2026-09-01
+
+### Fixed
+
+- Preserved capitalization through scoring so APA-style citations, spaCy NER,
+  and VADER's all-caps emphasis work on the text the user supplied.
+- Corrected percent-expression boundaries for ordinary forms such as `20%`,
+  `3.5%`, and `20 percent`, while rejecting word-attached forms such as
+  `20%rate`.
+- Made LIWC dictionary and regex caches follow the configured file identity,
+  including files configured or replaced after an earlier score in the same
+  process.
+- Made `doctor` parse LIWC files and reject unreadable, malformed, and partial
+  dictionaries instead of reporting that file existence alone is sufficient.
+- Stopped public scoring functions from overwriting `PI_LEXICON_FILE` and
+  added an explicit `lexicon_file` argument and `--lexicon-file` CLI option.
+- Isolated lexicon selection and compiled-pattern caches by lexicon file so
+  concurrent seeded, expanded, and custom scoring cannot contaminate results.
+
+### Scoring changes
+
+- Case-sensitive components can now distinguish cased and lowercased input.
+  For example, `Smith (2020)` activates `Evidence.attribution`, and VADER
+  retains its emphasis boost for words such as `GREAT`.
+- Overlapping number and percentage matches are counted as one quantitative
+  expression; a percentage is not double-counted as both a bare number and a
+  percentage.
+- Correctly loaded LIWC and custom lexicon resources may activate features
+  that incorrectly remained zero in `0.2.x`.
+
 ## [0.2.1] - 2026-08-24
 
 ### Changed
@@ -125,7 +155,8 @@ PEP 440 and semantic-versioning conventions.
 - Removed the unused `click` runtime dependency. The CLI continues to use the
   Python standard library's `argparse` module.
 
-[Unreleased]: https://github.com/krystalgong/Persuasion_Index_Code/compare/v0.2.1...HEAD
+[Unreleased]: https://github.com/krystalgong/Persuasion_Index_Code/compare/v0.3.0rc1...HEAD
+[0.3.0rc1]: https://github.com/krystalgong/Persuasion_Index_Code/compare/v0.2.1...v0.3.0rc1
 [0.2.1]: https://github.com/krystalgong/Persuasion_Index_Code/compare/v0.2.0...v0.2.1
 [0.2.0]: https://github.com/krystalgong/Persuasion_Index_Code/compare/v0.2.0rc7...v0.2.0
 [0.2.0rc7]: https://github.com/krystalgong/Persuasion_Index_Code/compare/v0.2.0rc6...v0.2.0rc7
